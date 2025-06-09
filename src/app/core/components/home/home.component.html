@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToBeFitAndStayIt</title>
+</head>
+<body>
+    <div class="bg-particles" id="particles"></div>
+    
+    <div class="app-container">
+        <app-header></app-header>
+
+        <main class="main-content">
+            <div class="stats-overview">
+                <div class="stat-item">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Core Features</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">effective</div>
+                    <div class="stat-label">Tracking</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">Good%</div>
+                    <div class="stat-label">Your Health</div>
+                </div>
+            </div>
+
+            <div class="wellness-grid">
+                <!-- Metabolism Information Card -->
+                <div class="wellness-card metabolism-card">
+                    <h3 class="card-title">Metabolism Guide</h3>
+                    <p class="card-description">Understanding your metabolism is crucial for optimal health. Your Basal Metabolic Rate (BMR) represents the calories your body burns at rest to maintain vital functions like breathing, circulation, and cell production. Factors like age, gender, weight, height, and activity level all influence your metabolic rate. A healthy metabolism supports energy production, weight management, and overall wellness.</p>
+                    
+                    <a [routerLink]="['/metabolism']" class="tracker-btn">Learn More About Metabolism</a>
+                </div>
+
+                <div class="wellness-card">
+                    <h3 class="card-title">Hydration Master</h3>
+                    <p class="card-description">Track your daily water intake with precision. Monitor hydration levels, set personalized goals, and maintain optimal fluid balance for peak physical and mental performance throughout your day.</p>
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="water-progress" style="width: 65%"></div>
+                        </div>
+                        <p class="progress-text" id="water-text">1.6L / 2.5L daily goal</p>
+                    </div>
+                    <a [routerLink]="['/hydration']" class="tracker-btn">Open Hydration Tracker</a>
+                </div>
+                
+                <div class="wellness-card">
+                    <h3 class="card-title">Sleep Optimizer</h3>
+                    <p class="card-description">Comprehensive sleep tracking and analysis. Monitor sleep patterns, quality scores, and recovery metrics. Get personalized recommendations to improve your rest and wake up refreshed every morning.</p>
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="sleep-progress" style="width: 80%"></div>
+                        </div>
+                        <p class="progress-text" id="sleep-text">6.4h / 8h sleep goal</p>
+                    </div>
+                    <a [routerLink]="['/sleep']" class="tracker-btn">Open Sleep Tracker</a>
+                </div>
+                
+                <div class="wellness-card">
+                    <h3 class="card-title">Nutrition Navigator</h3>
+                    <p class="card-description">Complete nutritional tracking and meal planning. Monitor calories, macronutrients, and micronutrients. Receive personalized dietary recommendations for optimal health and energy.</p>
+                    <div class="progress-section">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="nutrition-progress" style="width: 60%"></div>
+                        </div>
+                        <p class="progress-text" id="nutrition-text">1,240 / 2,000 calories</p>
+                    </div>
+                    <a [routerLink]="['/nutrition']" class="tracker-btn">Open Nutrition Tracker</a>
+                </div>
+            </div>
+            
+            <!-- App Status Notice -->
+            <div class="app-status-notice">
+                <h2 class="status-title">Mobile App Status</h2>
+                <p class="status-text">
+                    Currently, <strong>ToBeFitAndStayIt does not have a mobile app</strong>. 
+                    We're exploring the possibility of developing a comprehensive mobile application to bring all these wellness features to your smartphone.
+                </p>
+                <div class="app-interest-section">
+                    <h3>Would you be interested in a mobile app?</h3>
+                    <p style="margin: 15px 0; font-size: 1.1rem;">Your feedback helps us prioritize development efforts!</p>
+                    <div class="interest-buttons">
+                        <button class="interest-btn" onclick="selectInterest('yes', this)">Yes, I'd like an app!</button>
+                        <button class="interest-btn" onclick="selectInterest('maybe', this)">Maybe, tell me more</button>
+                        <button class="interest-btn" onclick="selectInterest('no', this)">No, web version is fine</button>
+                    </div>
+                    <div id="interest-feedback" style="margin-top: 20px; font-size: 1.1rem; display: none;"></div>
+                </div>
+            </div>
+            
+            <div class="importance-section">
+                <h2 class="importance-title">The Science of Wellness</h2>
+                <p class="importance-text">
+                    Hydration, sleep, nutrition, and metabolic health are the four fundamental pillars that support optimal human performance. Scientific research shows that proper hydration enhances cognitive function by up to 15%, quality sleep improves memory consolidation and immune function, while balanced nutrition provides the essential building blocks for cellular repair and energy production. Understanding your metabolism helps optimize caloric intake for your specific needs. When these four elements work in harmony, they create a powerful foundation for physical vitality, mental clarity, and emotional well-being.
+                </p>
+            </div>
+        </main>
+        <app-footer></app-footer>
+
+    </div>
+
+</body>
+</html>

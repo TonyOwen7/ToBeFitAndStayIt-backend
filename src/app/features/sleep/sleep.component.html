@@ -1,0 +1,170 @@
+<div class="app-container">
+
+    <app-header title="ToBeFitAndStayIt" subtitle="Sleep Tracker"
+    [border_auth_btn]="'2px solid #8bc34a'"
+    [background]="'linear-gradient(135deg, #8bc34a 0%, #689f38 100%)'"
+    [radiant]="'radial-gradient(circle, rgba(139, 195, 74, 0.4) 0%, transparent 70%)'"></app-header>
+
+  
+    <main class="main-content">
+      <!-- Daily Sleep Tracking Panel -->
+      <div class="panel sleep-panel">
+        <h2 class="panel-title">Daily Sleep Tracking</h2>
+        
+        <div class="sleep-display">
+          <div class="sleep-counter">{{ totalSleep.toFixed(1) }}</div>
+          <div class="sleep-label">hours slept today</div>
+        </div>
+  
+        <div class="quick-add-section">
+          <button class="quick-add-btn" (click)="quickAdd(0.5)">Power Nap (30min)</button>
+          <button class="quick-add-btn" (click)="quickAdd(1)">Short Nap (1h)</button>
+          <button class="quick-add-btn" (click)="quickAdd(2)">Long Nap (2h)</button>
+          <button class="quick-add-btn" (click)="quickAdd(8)">Full Night (8h)</button>
+        </div>
+  
+        <div class="sleep-input-section">
+          <div class="form-group">
+            <label class="form-label">Sleep Type</label>
+            <select [(ngModel)]="sleepType" class="form-select">
+              <option value="night">Night Sleep</option>
+              <option value="nap">Nap</option>
+              <option value="rest">Rest Period</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Start Time</label>
+            <input type="time" [(ngModel)]="startTime" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Time</label>
+            <input type="time" [(ngModel)]="endTime" class="form-input">
+          </div>
+          <button class="add-btn" (click)="addSleep()">Add</button>
+        </div>
+  
+        <div class="sleep-list">
+          <div *ngIf="sleepSessions.length === 0" style="text-align: center; color: #757575; padding: 20px;">
+            No sleep sessions added yet. Start tracking your rest!
+          </div>
+          <div *ngFor="let session of sleepSessions" class="sleep-item">
+            <div class="sleep-info">
+              <div class="sleep-name">{{ session.type }}</div>
+              <div class="sleep-details">{{ session.startTime }} - {{ session.endTime }}</div>
+            </div>
+            <div class="sleep-duration">{{ session.duration.toFixed(1) }}h</div>
+            <button class="remove-btn" (click)="removeSleep(session.id)">×</button>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Sleep Goal Panel -->
+      <div class="panel">
+        <h2 class="panel-title">Sleep Goal</h2>
+        
+        <div class="goal-inputs">
+          <div class="form-group">
+            <label class="form-label">Age</label>
+            <input 
+              type="number" 
+              [(ngModel)]="age" 
+              class="form-input" 
+              placeholder="25" 
+              min="1" 
+              max="120" 
+              (ngModelChange)="calculateGoal()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sleep Quality</label>
+            <select [(ngModel)]="sleepQuality" class="form-select" (ngModelChange)="calculateGoal()">
+              <option value="good">Good</option>
+              <option value="average">Average</option>
+              <option value="poor">Poor</option>
+            </select>
+          </div>
+          <div class="form-group lifestyle-selector">
+            <label class="form-label">Lifestyle</label>
+            <div class="lifestyle-options">
+              <button 
+                class="lifestyle-btn" 
+                [class.active]="lifestyle === 'sedentary'"
+                (click)="setLifestyle('sedentary')">
+                Sedentary
+              </button>
+              <button 
+                class="lifestyle-btn" 
+                [class.active]="lifestyle === 'active'"
+                (click)="setLifestyle('active')">
+                Active
+              </button>
+              <button 
+                class="lifestyle-btn" 
+                [class.active]="lifestyle === 'athlete'"
+                (click)="setLifestyle('athlete')">
+                Athlete
+              </button>
+              <button 
+                class="lifestyle-btn" 
+                [class.active]="lifestyle === 'stressed'"
+                (click)="setLifestyle('stressed')">
+                High Stress
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Current Status Panel -->
+      <div class="panel">
+        <h2 class="panel-title">Sleep Status</h2>
+        
+        <div class="sleep-icon">
+          <div class="sleep-level" [style.height.%]="sleepPercentage"></div>
+        </div>
+        
+        <div class="sleep-quality">
+          <div class="sleep-circle" [style.background]="sleepCircleBackground">
+            <span>{{ sleepPercentage | number:'1.0-0' }}%</span>
+          </div>
+          <div class="sleep-text" [style.color]="sleepStatusColor">{{ sleepStatusText }}</div>
+        </div>
+  
+        <div class="status-grid">
+          <div class="status-item">
+            <div class="status-value">{{ dailySleepGoal.toFixed(1) }}</div>
+            <div class="status-label">Daily Goal (hours)</div>
+          </div>
+          <div class="status-item">
+            <div class="status-value">{{ remainingHours.toFixed(1) }}</div>
+            <div class="status-label">Remaining (hours)</div>
+          </div>
+        </div>
+  
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="sleepPercentage"></div>
+        </div>
+        <div style="text-align: center; font-size: 0.9rem; color: #757575; margin-top: 5px;">
+          <span>{{ sleepPercentage | number:'1.0-0' }}% of daily goal</span>
+        </div>
+      </div>
+  
+      <!-- Recommendations Panel -->
+      <div class="panel full-width">
+        <h2 class="panel-title">
+          <span class="panel-icon">💡</span>
+          Sleep Tips
+        </h2>
+        
+        <div class="recommendations">
+          <div *ngFor="let recommendation of recommendations" class="recommendation-card">
+            <div class="recommendation-title">{{ recommendation.title }}</div>
+            <div class="recommendation-text">{{ recommendation.text }}</div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <app-footer
+    [background]="'linear-gradient(135deg, #8bc34a 0%, #689f38 100%)'"
+    [radiant]="'radial-gradient(circle, rgba(139, 195, 74, 0.4) 0%, transparent 70%)'"></app-footer>
+
+  </div>

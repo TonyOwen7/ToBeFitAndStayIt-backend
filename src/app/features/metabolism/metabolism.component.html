@@ -1,0 +1,162 @@
+<div class="bg-particles" id="particles"></div>
+
+<div class="app-container">
+  <app-header></app-header>
+  <main class="main-content">
+    <div class="calculator-container">
+      <div class="input-section">
+        <h2 class="section-title">
+          Your Details
+        </h2>
+        
+        <div class="input-group">
+          <label class="input-label" for="age">Age (years)</label>
+          <input 
+            type="number" 
+            id="age" 
+            class="input-field" 
+            placeholder="Enter your age" 
+            min="10" 
+            max="100"
+            [(ngModel)]="age"
+            (input)="onAgeChange($any($event.target).value)"
+            (focus)="onInputFocus($event)"
+            (blur)="onInputBlur($event)"
+            (keypress)="onKeyPress($event)">
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label" for="gender">Gender</label>
+          <select 
+            id="gender" 
+            class="select-field"
+            [(ngModel)]="gender"
+            (focus)="onInputFocus($event)"
+            (blur)="onInputBlur($event)">
+            <option value="">Select gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label" for="weight">Weight (kg)</label>
+          <input 
+            type="number" 
+            id="weight" 
+            class="input-field" 
+            placeholder="Enter your weight" 
+            min="30" 
+            max="300" 
+            step="1"
+            [(ngModel)]="weight"
+            (input)="onWeightChange($any($event.target).value)"
+            (focus)="onInputFocus($event)"
+            (blur)="onInputBlur($event)"
+            (keypress)="onKeyPress($event)">
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label" for="height">Height (cm)</label>
+          <input 
+            type="number" 
+            id="height" 
+            class="input-field" 
+            placeholder="Enter your height" 
+            min="100" 
+            max="250"
+            [(ngModel)]="height"
+            (input)="onHeightChange($any($event.target).value)"
+            (focus)="onInputFocus($event)"
+            (blur)="onInputBlur($event)"
+            (keypress)="onKeyPress($event)">
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label" for="activity">Activity Level</label>
+          <select 
+            id="activity" 
+            class="select-field"
+            [(ngModel)]="activityLevel"
+            (focus)="onInputFocus($event)"
+            (blur)="onInputBlur($event)">
+            <option value="">Select activity level</option>
+            <option 
+              *ngFor="let option of activityOptions" 
+              [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
+        
+        <button 
+          class="calculate-btn" 
+          (click)="calculateMetabolism()">
+          Calculate My Metabolism
+        </button>
+      </div>
+      
+      <div class="results-section">
+        <h2 class="section-title">
+          Your Results
+        </h2>
+        
+        <div id="results-content" class="results-content">
+          <!-- Error Message -->
+          <div *ngIf="errorMessage && !showResults" class="error-message">
+            <span class="error-icon">⚠️</span>
+            {{ errorMessage }}
+          </div>
+          
+          <!-- Empty State -->
+          <div *ngIf="!showResults && !errorMessage" class="empty-results">
+            Enter your details and click calculate to see your metabolism results
+          </div>
+          
+          <!-- Results -->
+          <div *ngIf="showResults && results" class="results-grid">
+            <div class="result-item">
+              <div class="result-label">Basal Metabolic Rate (BMR)</div>
+              <div class="result-value">{{ results.bmr | number:'1.0-0' }} cal/day</div>
+              <div class="result-description">Calories burned at complete rest</div>
+              <div class="formula-display">
+                {{ getBMRFormula() }}
+              </div>
+            </div>
+            
+            <div class="result-item">
+              <div class="result-label">Total Daily Energy Expenditure (TDEE)</div>
+              <div class="result-value">{{ results.tdee | number:'1.0-0' }} cal/day</div>
+              <div class="result-description">
+                Total calories burned with your {{ getActivityLabel() }} lifestyle
+              </div>
+              <div class="formula-display">
+                TDEE = BMR × Activity Factor ({{ results.activityLevel }})
+              </div>
+            </div>
+            
+            <div class="result-item">
+              <div class="result-label">Weight Loss Target</div>
+              <div class="result-value">{{ results.weightLoss | number:'1.0-0' }} cal/day</div>
+              <div class="result-description">Calories for 0.5kg/week weight loss</div>
+            </div>
+            
+            <div class="result-item">
+              <div class="result-label">Weight Gain Target</div>
+              <div class="result-value">{{ results.weightGain | number:'1.0-0' }} cal/day</div>
+              <div class="result-description">Calories for healthy weight gain</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="info-section">
+      <h2 class="info-title">Understanding Your Metabolism</h2>
+      <p class="info-text">
+        Your Basal Metabolic Rate (BMR) represents the calories your body burns at rest to maintain vital functions like breathing, circulation, and cell production. Total Daily Energy Expenditure (TDEE) includes BMR plus calories burned through physical activity. Understanding these values helps you make informed decisions about nutrition and fitness goals for optimal health and body composition.
+      </p>
+    </div>
+  </main>
+  <app-footer></app-footer>
+</div>

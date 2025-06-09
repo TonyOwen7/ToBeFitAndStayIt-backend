@@ -1,0 +1,183 @@
+<div class="app-container">
+    <app-header title="ToBeFitAndStayIt" subtitle="Calorie Tracker"
+    [border_auth_btn]="'2px solid #667eea'"
+    [background]="'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'"
+    [radiant]="'radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%)'"></app-header>
+
+
+    <main class="main-content">
+    <!-- Daily Intake Panel -->
+    <div class="panel intake-panel">
+        <h2 class="panel-title">
+        Daily Calorie Intake
+        </h2>
+        
+        <div class="calorie-display">
+        <div class="calorie-counter">{{ totalCalories }}</div>
+        <div class="calorie-label">Total Calories Today</div>
+        </div>
+
+        <div class="food-input-section">
+        <div class="form-group">
+            <label class="form-label">Food/Drink Item</label>
+            <input 
+            type="text" 
+            [(ngModel)]="foodName" 
+            class="form-input" 
+            placeholder="e.g., Apple, Coffee, Pasta"
+            (keyup.enter)="addFood()">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Quantity</label>
+            <input 
+            type="number" 
+            [(ngModel)]="quantity" 
+            class="form-input" 
+            placeholder="1" 
+            min="1" 
+            step="1"
+            (keyup.enter)="addFood()">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Calories per unit</label>
+            <input 
+            type="number" 
+            [(ngModel)]="caloriesPerUnit" 
+            class="form-input" 
+            placeholder="80" 
+            min="1"
+            (keyup.enter)="addFood()">
+        </div>
+        <button class="add-btn" (click)="addFood()">Add</button>
+        </div>
+
+        <div class="food-list">
+        <div *ngIf="hasNoFoodItems" 
+            style="text-align: center; color: #718096; padding: 20px;">
+            No items added yet. Start tracking your intake!
+        </div>
+        
+        <div *ngFor="let item of foodItems" class="food-item">
+            <div class="food-info">
+            <div class="food-name">{{ item.name }}</div>
+            <div class="food-details">{{ item.quantity }} × {{ item.caloriesPerUnit }} cal/unit</div>
+            </div>
+            <div class="food-calories">{{ item.totalCalories }} cal</div>
+            <button class="remove-btn" (click)="removeFood(item.id)">×</button>
+        </div>
+        </div>
+    </div>
+
+    <!-- Weight Goal Panel -->
+    <div class="panel">
+        <h2 class="panel-title">
+        Weight Goal
+        </h2>
+        
+        <div class="goal-inputs">
+        <div class="form-group">
+            <label class="form-label">Target Weight (kg)</label>
+            <input 
+            type="number" 
+            [(ngModel)]="targetWeight" 
+            class="form-input" 
+            min="30"
+            placeholder="70" 
+            step="1" 
+            (ngModelChange)="calculateGoal()">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Time Period</label>
+            <input 
+            type="number" 
+            [(ngModel)]="timePeriod" 
+            class="form-input" 
+            placeholder="12" 
+            min="1" 
+            (ngModelChange)="calculateGoal()">
+        </div>
+        <div class="form-group period-selector">
+            <label class="form-label">Period Type</label>
+            <div class="period-options">
+                <button 
+                class="period-btn"
+                [class.active]="isPeriodActive('days')"
+                (click)="setPeriod('days')">
+                Days
+            </button>
+            <button 
+                class="period-btn"
+                [class.active]="isPeriodActive('weeks')"
+                (click)="setPeriod('weeks')">
+                Weeks
+            </button>
+            <button 
+                class="period-btn"
+                [class.active]="isPeriodActive('months')"
+                (click)="setPeriod('months')">
+                Months
+            </button>    
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Current Status Panel -->
+    <div class="panel">
+        <h2 class="panel-title">
+        Current Status
+        </h2>
+        
+        <div class="status-grid">
+        <div class="status-item">
+            <div class="status-value">{{ currentWeightDisplay }}</div>
+            <div class="status-label">Current Weight (kg)</div>
+        </div>
+        <div class="status-item">
+            <div class="status-value">{{ dailyCalorieTargetDisplay }}</div>
+            <div class="status-label">Daily Calorie Target</div>
+        </div>
+        </div>
+
+        <div class="form-group">
+        <label class="form-label">Enter Current Weight (kg)</label>
+        <input 
+            type="number" 
+            [(ngModel)]="currentWeight" 
+            class="form-input" 
+            placeholder="75" 
+            step="1" 
+            (ngModelChange)="updateCurrentWeight()">
+        </div>
+
+        <div class="progress-bar">
+        <div 
+            class="progress-fill" 
+            [style.width.%]="calorieProgress">
+        </div>
+        </div>
+        <div style="text-align: center; font-size: 0.9rem; color: #718096; margin-top: 5px;">
+        <span>{{ progressText }}</span>
+        </div>
+    </div>
+
+    <!-- Recommendations Panel -->
+    <div class="panel full-width">
+        <h2 class="panel-title">
+        Recommendations
+        </h2>
+        
+        <div>
+        <div *ngFor="let rec of recommendations" class="recommendation-card">
+            <div class="recommendation-title">{{ rec.title }}</div>
+            <div class="recommendation-text">{{ rec.text }}</div>
+        </div>
+        </div>
+    </div>
+    </main>
+
+    <app-footer
+    [background]="'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'"
+    [radiant]="'radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%)'"></app-footer>
+
+</div>

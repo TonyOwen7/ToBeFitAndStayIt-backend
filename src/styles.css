@@ -1,1 +1,16 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: radial-gradient(ellipse at top, #d4fc79 0%, #96e6a1 25%, #8bc34a 50%, #689f38 75%, #558b2f 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: #333;
+    overflow-x: hidden;
+    position: relative;
+}

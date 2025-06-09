@@ -1,0 +1,91 @@
+.golden-header {
+    position: relative;
+    padding: 50px 30px 30px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.golden-radiant {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    animation: rotate 12s linear infinite;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.app-title {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #1a1a2e;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 2;
+    letter-spacing: 4px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.app-title:hover {
+    transform: scale(1.05);
+}
+
+.app-subtitle {
+    font-size: 1.5rem;
+    color: #2F4F2F;
+    position: relative;
+    z-index: 2;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.auth-section {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    z-index: 10;
+    display: flex;
+    gap: 15px;
+}
+
+.auth-btn {
+    background: rgba(255, 255, 255, 0.9);
+    color: #689f38;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    backdrop-filter: blur(10px);
+}
+
+.auth-btn:hover {
+    background: rgba(255, 215, 0, 0.9);
+    color: #1a1a2e;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+    .golden-header {
+        border-radius: 0;
+        padding: 40px 20px 30px;
+    }
+    
+    .app-title {
+        font-size: 3rem;
+    }
+
+    .auth-section {
+        position: static;
+        justify-content: center;
+        margin-top: 20px;
+    }
+}
