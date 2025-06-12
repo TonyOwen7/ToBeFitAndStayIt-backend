@@ -6,6 +6,7 @@ import { SleepComponent } from './features/sleep/sleep.component';
 import { AppComponent } from './app.component';
 import { MetabolismComponent } from './features/metabolism/metabolism.component';
 import { HomeComponent } from './core/components/home/home.component';
+import { RegisterComponent } from './auth/register/register.component';
 
 export const routes: Routes = [
   { path: 'nutrition', component: NutritionComponent },
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'sleep', component: SleepComponent },
   { path: 'metabolism', component: MetabolismComponent },
   { path: 'home', component : HomeComponent },
+  { path: 'register', component: RegisterComponent }, // Main app component route
   { path: '', redirectTo: '/home', pathMatch: 'full' } // Redirect to home on empty path,
 ];

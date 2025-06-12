@@ -28,6 +28,8 @@ export class HydrationComponent {
   waterItems: WaterItem[] = [];
   totalWater: number = 0;
   bodyWeight: number = 0;
+  gender: string = 'male'; // New gender property
+  age: number = 0; // Optional: age can also affect hydration needs
   activityLevel: string = 'low';
   climate: string = 'normal';
   dailyWaterGoal: number = 2000;
@@ -101,30 +103,60 @@ export class HydrationComponent {
     this.calculateGoal();
   }
 
+  setGender(selectedGender: string): void {
+    this.gender = selectedGender;
+    this.calculateGoal();
+  }
+
   calculateGoal(): void {
     if (this.bodyWeight > 0) {
-      // Base water need: 35mL per kg of body weight
-      let baseWater = this.bodyWeight * 35;
+      // Gender-based base water calculation
+      let baseWater: number;
+      
+      if (this.gender === 'male') {
+        // Males: Higher base requirement due to higher muscle mass and metabolism
+        baseWater = this.bodyWeight * 37; // 37mL per kg for males
+      } else {
+        // Females: Slightly lower base requirement
+        baseWater = this.bodyWeight * 31; // 31mL per kg for females
+      }
+
+      // Age adjustment (optional - older adults may need slightly more)
+      if (this.age > 65) {
+        baseWater *= 1.1; // 10% increase for seniors
+      } else if (this.age > 0 && this.age < 18) {
+        baseWater *= 1.15; // 15% increase for children/teens due to higher turnover
+      }
       
       // Activity level multiplier
       const activityMultipliers: { [key: string]: number } = {
         'low': 1.0,
-        'moderate': 1.2,
-        'high': 1.4,
-        'intense': 1.6
+        'moderate': this.gender === 'male' ? 1.2 : 1.15, // Males need slightly more during exercise
+        'high': this.gender === 'male' ? 1.4 : 1.3,
+        'intense': this.gender === 'male' ? 1.6 : 1.5
       };
       
       // Climate multiplier
       const climateMultipliers: { [key: string]: number } = {
         'normal': 1.0,
-        'hot': 1.3,
-        'cold': 0.9
+        'hot': this.gender === 'male' ? 1.3 : 1.25, // Males tend to sweat more
+        'cold': 0.95 // Slightly reduced in cold weather
       };
       
-      this.dailyWaterGoal = Math.round(baseWater * activityMultipliers[this.activityLevel] * climateMultipliers[this.climate]);
+      this.dailyWaterGoal = Math.round(
+        baseWater * 
+        activityMultipliers[this.activityLevel] * 
+        climateMultipliers[this.climate]
+      );
       
-      // Ensure reasonable limits (1.5L to 4L)
-      this.dailyWaterGoal = Math.max(1500, Math.min(4000, this.dailyWaterGoal));
+      // Gender-specific limits
+      if (this.gender === 'male') {
+        // Males: 2L to 4.5L
+        this.dailyWaterGoal = Math.max(2000, Math.min(4500, this.dailyWaterGoal));
+      } else {
+        // Females: 1.6L to 3.5L
+        this.dailyWaterGoal = Math.max(1600, Math.min(3500, this.dailyWaterGoal));
+      }
     }
   }
 
@@ -184,11 +216,28 @@ export class HydrationComponent {
         });
       }
 
+      // Gender-specific recommendations
+      if (this.gender === 'female') {
+        recommendations.push({
+          title: "Female Hydration Tip",
+          text: "Women's hydration needs can vary during menstruation, pregnancy, or breastfeeding. Consider increasing intake during these times."
+        });
+      } else {
+        recommendations.push({
+          title: "Male Hydration Tip",
+          text: "Men typically have higher muscle mass and may need more water, especially when strength training or in hot climates."
+        });
+      }
+
       // Activity-based recommendations
       if (this.activityLevel === 'high' || this.activityLevel === 'intense') {
+        const genderTip = this.gender === 'male' 
+          ? "Males typically lose more fluids through sweat during intense exercise."
+          : "Focus on consistent hydration before, during, and after workouts.";
+        
         recommendations.push({
           title: "High Activity Level",
-          text: "With your high activity level, remember to drink water before, during, and after exercise to replace fluids lost through sweat."
+          text: `With your high activity level, remember to drink water before, during, and after exercise. ${genderTip}`
         });
       }
 
@@ -212,7 +261,7 @@ export class HydrationComponent {
     if (recommendations.length === 0) {
       recommendations.push({
         title: "Get Started",
-        text: "Enter your weight and activity level to receive personalized hydration recommendations."
+        text: "Enter your weight, gender, and activity level to receive personalized hydration recommendations."
       });
     }
 

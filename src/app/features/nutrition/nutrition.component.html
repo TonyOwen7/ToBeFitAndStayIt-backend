@@ -4,7 +4,6 @@
     [background]="'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'"
     [radiant]="'radial-gradient(circle, rgba(102, 126, 234, 0.4) 0%, transparent 70%)'"></app-header>
 
-
     <main class="main-content">
     <!-- Daily Intake Panel -->
     <div class="panel intake-panel">
@@ -68,6 +67,110 @@
         </div>
     </div>
 
+    <!-- Personal Information Panel -->
+    <div class="panel">
+        <h2 class="panel-title">
+        Personal Information
+        </h2>
+        
+        <div class="personal-info-grid">
+        <div class="form-group">
+            <label class="form-label">Gender</label>
+            <div class="gender-options">
+            <button 
+                class="gender-btn"
+                [class.active]="isGenderActive('female')"
+                (click)="setGender('female')">
+                Female
+            </button>
+            <button 
+                class="gender-btn"
+                [class.active]="isGenderActive('male')"
+                (click)="setGender('male')">
+                Male
+            </button>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Age (years)</label>
+            <input 
+            type="number" 
+            [(ngModel)]="age" 
+            class="form-input" 
+            placeholder="25" 
+            min="15" 
+            max="100"
+            (ngModelChange)="updatePersonalInfo()">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Height (cm)</label>
+            <input 
+            type="number" 
+            [(ngModel)]="height" 
+            class="form-input" 
+            placeholder="165" 
+            min="120" 
+            max="220"
+            (ngModelChange)="updatePersonalInfo()">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Current Weight (kg)</label>
+            <input 
+            type="number" 
+            [(ngModel)]="currentWeight" 
+            class="form-input" 
+            placeholder="65" 
+            min="30" 
+            max="200"
+            (ngModelChange)="updateCurrentWeight()">
+        </div>
+        </div>
+
+        <div class="form-group">
+        <label class="form-label">Activity Level</label>
+        <div class="activity-options">
+            <button 
+            class="activity-btn"
+            [class.active]="isActivityLevelActive('sedentary')"
+            (click)="setActivityLevel('sedentary')"
+            title="Little to no exercise">
+            Sedentary
+            </button>
+            <button 
+            class="activity-btn"
+            [class.active]="isActivityLevelActive('light')"
+            (click)="setActivityLevel('light')"
+            title="Light exercise 1-3 days/week">
+            Light
+            </button>
+            <button 
+            class="activity-btn"
+            [class.active]="isActivityLevelActive('moderate')"
+            (click)="setActivityLevel('moderate')"
+            title="Moderate exercise 3-5 days/week">
+            Moderate
+            </button>
+            <button 
+            class="activity-btn"
+            [class.active]="isActivityLevelActive('active')"
+            (click)="setActivityLevel('active')"
+            title="Heavy exercise 6-7 days/week">
+            Active
+            </button>
+            <button 
+            class="activity-btn"
+            [class.active]="isActivityLevelActive('very_active')"
+            (click)="setActivityLevel('very_active')"
+            title="Very heavy exercise, physical job">
+            Very Active
+            </button>
+        </div>
+        </div>
+    </div>
+
     <!-- Weight Goal Panel -->
     <div class="panel">
         <h2 class="panel-title">
@@ -82,7 +185,7 @@
             [(ngModel)]="targetWeight" 
             class="form-input" 
             min="30"
-            placeholder="70" 
+            placeholder="60" 
             step="1" 
             (ngModelChange)="calculateGoal()">
         </div>
@@ -99,7 +202,7 @@
         <div class="form-group period-selector">
             <label class="form-label">Period Type</label>
             <div class="period-options">
-                <button 
+            <button 
                 class="period-btn"
                 [class.active]="isPeriodActive('days')"
                 (click)="setPeriod('days')">
@@ -125,7 +228,7 @@
     <!-- Current Status Panel -->
     <div class="panel">
         <h2 class="panel-title">
-        Current Status
+        Current Status & Metabolism
         </h2>
         
         <div class="status-grid">
@@ -134,20 +237,17 @@
             <div class="status-label">Current Weight (kg)</div>
         </div>
         <div class="status-item">
+            <div class="status-value">{{ bmrDisplay }}</div>
+            <div class="status-label">BMR (Base Metabolic Rate)</div>
+        </div>
+        <div class="status-item">
+            <div class="status-value">{{ tdeeDisplay }}</div>
+            <div class="status-label">TDEE (Total Daily Energy)</div>
+        </div>
+        <div class="status-item">
             <div class="status-value">{{ dailyCalorieTargetDisplay }}</div>
             <div class="status-label">Daily Calorie Target</div>
         </div>
-        </div>
-
-        <div class="form-group">
-        <label class="form-label">Enter Current Weight (kg)</label>
-        <input 
-            type="number" 
-            [(ngModel)]="currentWeight" 
-            class="form-input" 
-            placeholder="75" 
-            step="1" 
-            (ngModelChange)="updateCurrentWeight()">
         </div>
 
         <div class="progress-bar">
@@ -159,12 +259,18 @@
         <div style="text-align: center; font-size: 0.9rem; color: #718096; margin-top: 5px;">
         <span>{{ progressText }}</span>
         </div>
+
+        <div style="text-align: center; font-size: 0.85rem; color: #4a5568; margin-top: 10px; padding: 10px; background-color: #f7fafc; border-radius: 6px;">
+        <strong>BMR:</strong> Calories needed at rest | 
+        <strong>TDEE:</strong> Calories needed with activity | 
+        <strong>Target:</strong> Adjusted for your goal
+        </div>
     </div>
 
     <!-- Recommendations Panel -->
     <div class="panel full-width">
         <h2 class="panel-title">
-        Recommendations
+        Personalized Recommendations
         </h2>
         
         <div>

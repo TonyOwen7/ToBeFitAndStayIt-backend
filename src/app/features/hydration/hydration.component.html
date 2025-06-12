@@ -1,183 +1,217 @@
 <div class="app-container">
-    <app-header title="ToBeFitAndStayIt" subtitle="Water Tracker"
-    [border_auth_btn]="'2px solid #42a5f5'"
-    background="linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)"
-    radiant="radial-gradient(circle, rgba(66, 165, 245, 0.4) 0%, transparent 70%)"></app-header>
-  
-  
-    <main class="main-content">
-      <!-- Daily Water Intake Panel -->
-      <div class="panel intake-panel">
-        <h2 class="panel-title">
-          Daily Water Intake
-        </h2>
+  <app-header title="ToBeFitAndStayIt" subtitle="Water Tracker"
+  [border_auth_btn]="'2px solid #42a5f5'"
+  background="linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)"
+  radiant="radial-gradient(circle, rgba(66, 165, 245, 0.4) 0%, transparent 70%)"></app-header>
+
+
+  <main class="main-content">
+    <!-- Daily Water Intake Panel -->
+    <div class="panel intake-panel">
+      <h2 class="panel-title">
+        Daily Water Intake
+      </h2>
+      
+      <div class="water-display">
+        <div class="water-counter">{{ totalWater }}</div>
+        <div class="water-label">mL consumed today</div>
+      </div>
+
+      <div class="quick-add-section">
+        <button class="quick-add-btn" (click)="quickAdd(250)">Glass (250ml)</button>
+        <button class="quick-add-btn" (click)="quickAdd(500)">Bottle (500ml)</button>
+        <button class="quick-add-btn" (click)="quickAdd(330)">Can (330ml)</button>
+        <button class="quick-add-btn" (click)="quickAdd(200)">Cup (200ml)</button>
+        <button class="quick-add-btn" (click)="quickAdd(150)">Tea/Coffee (150ml)</button>
+      </div>
+
+      <div class="water-input-section">
+        <div class="form-group">
+          <label class="form-label">Drink Item</label>
+          <input 
+            type="text" 
+            [(ngModel)]="drinkName" 
+            class="form-input" 
+            placeholder="e.g., Water, Tea, Juice">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input 
+            type="number" 
+            [(ngModel)]="quantity" 
+            class="form-input" 
+            placeholder="1" 
+            min="1" 
+            step="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Volume per unit (mL)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="volumePerUnit" 
+            class="form-input" 
+            placeholder="250" 
+            min="1">
+        </div>
+        <button class="add-btn" (click)="addDrink()">Add</button>
+      </div>
+
+      <div class="water-list">
+        <div *ngIf="waterItems.length === 0" style="text-align: center; color: #757575; padding: 20px;">
+          No drinks added yet. Start tracking your hydration!
+        </div>
+        <div *ngFor="let item of waterItems" class="water-item">
+          <div class="water-info">
+            <div class="water-name">{{ item.name }}</div>
+            <div class="water-details">{{ item.quantity }} × {{ item.volumePerUnit }} mL</div>
+          </div>
+          <div class="water-amount">{{ item.totalVolume }} mL</div>
+          <button class="remove-btn" (click)="removeDrink(item.id)">×</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hydration Goal Panel -->
+    <div class="panel">
+      <h2 class="panel-title">
+        Hydration Goal
+      </h2>
+      
+      <div class="goal-inputs">
+        <div class="form-group">
+          <label class="form-label">Gender</label>
+          <div class="gender-selector">
+            <button 
+              class="gender-btn" 
+              [class.active]="gender === 'male'"
+              (click)="setGender('male')">
+              Male
+            </button>
+            <button 
+              class="gender-btn" 
+              [class.active]="gender === 'female'"
+              (click)="setGender('female')">
+              Female
+            </button>
+          </div>
+        </div>
         
-        <div class="water-display">
-          <div class="water-counter">{{ totalWater }}</div>
-          <div class="water-label">mL consumed today</div>
+        <div class="form-group">
+          <label class="form-label">Weight (kg)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="bodyWeight" 
+            (ngModelChange)="calculateGoal()"
+            class="form-input" 
+            min="30"
+            max="200"
+            placeholder="70" 
+            step="1">
         </div>
-  
-        <div class="quick-add-section">
-          <button class="quick-add-btn" (click)="quickAdd(250)">Glass (250ml)</button>
-          <button class="quick-add-btn" (click)="quickAdd(500)">Bottle (500ml)</button>
-          <button class="quick-add-btn" (click)="quickAdd(330)">Can (330ml)</button>
-          <button class="quick-add-btn" (click)="quickAdd(200)">Cup (200ml)</button>
-          <button class="quick-add-btn" (click)="quickAdd(150)">Tea/Coffee (150ml)</button>
+        
+        <div class="form-group">
+          <label class="form-label">Age (optional)</label>
+          <input 
+            type="number" 
+            [(ngModel)]="age" 
+            (ngModelChange)="calculateGoal()"
+            class="form-input" 
+            min="5"
+            max="120"
+            placeholder="25" 
+            step="1">
         </div>
-  
-        <div class="water-input-section">
-          <div class="form-group">
-            <label class="form-label">Drink Item</label>
-            <input 
-              type="text" 
-              [(ngModel)]="drinkName" 
-              class="form-input" 
-              placeholder="e.g., Water, Tea, Juice">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Quantity</label>
-            <input 
-              type="number" 
-              [(ngModel)]="quantity" 
-              class="form-input" 
-              placeholder="1" 
-              min="1" 
-              step="1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Volume per unit (mL)</label>
-            <input 
-              type="number" 
-              [(ngModel)]="volumePerUnit" 
-              class="form-input" 
-              placeholder="250" 
-              min="1">
-          </div>
-          <button class="add-btn" (click)="addDrink()">Add</button>
+        
+        <div class="form-group">
+          <label class="form-label">Climate</label>
+          <select 
+            [(ngModel)]="climate" 
+            (ngModelChange)="calculateGoal()"
+            class="form-select">
+            <option value="normal">Normal</option>
+            <option value="hot">Hot/Humid</option>
+            <option value="cold">Cold</option>
+          </select>
         </div>
-  
-        <div class="water-list">
-          <div *ngIf="waterItems.length === 0" style="text-align: center; color: #757575; padding: 20px;">
-            No drinks added yet. Start tracking your hydration!
-          </div>
-          <div *ngFor="let item of waterItems" class="water-item">
-            <div class="water-info">
-              <div class="water-name">{{ item.name }}</div>
-              <div class="water-details">{{ item.quantity }} × {{ item.volumePerUnit }} mL</div>
-            </div>
-            <div class="water-amount">{{ item.totalVolume }} mL</div>
-            <button class="remove-btn" (click)="removeDrink(item.id)">×</button>
+        
+        <div class="form-group activity-selector">
+          <label class="form-label">Activity Level</label>
+          <div class="activity-options">
+            <button 
+              class="activity-btn" 
+              [class.active]="activityLevel === 'low'"
+              (click)="setActivity('low')">Low</button>
+            <button 
+              class="activity-btn" 
+              [class.active]="activityLevel === 'moderate'"
+              (click)="setActivity('moderate')">Moderate</button>
+            <button 
+              class="activity-btn" 
+              [class.active]="activityLevel === 'high'"
+              (click)="setActivity('high')">High</button>
+            <button 
+              class="activity-btn" 
+              [class.active]="activityLevel === 'intense'"
+              (click)="setActivity('intense')">Intense</button>
           </div>
         </div>
       </div>
-  
-      <!-- Hydration Goal Panel -->
-      <div class="panel">
-        <h2 class="panel-title">
-          Hydration Goal
-        </h2>
-        
-        <div class="goal-inputs">
-          <div class="form-group">
-            <label class="form-label">Weight (kg)</label>
-            <input 
-              type="number" 
-              [(ngModel)]="bodyWeight" 
-              (ngModelChange)="calculateGoal()"
-              class="form-input" 
-              min="30"
-              placeholder="70" 
-              step="1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Climate</label>
-            <select 
-              [(ngModel)]="climate" 
-              (ngModelChange)="calculateGoal()"
-              class="form-select">
-              <option value="normal">Normal</option>
-              <option value="hot">Hot/Humid</option>
-              <option value="cold">Cold</option>
-            </select>
-          </div>
-          <div class="form-group activity-selector">
-            <label class="form-label">Activity Level</label>
-            <div class="activity-options">
-              <button 
-                class="activity-btn" 
-                [class.active]="activityLevel === 'low'"
-                (click)="setActivity('low')">Low</button>
-              <button 
-                class="activity-btn" 
-                [class.active]="activityLevel === 'moderate'"
-                (click)="setActivity('moderate')">Moderate</button>
-              <button 
-                class="activity-btn" 
-                [class.active]="activityLevel === 'high'"
-                (click)="setActivity('high')">High</button>
-              <button 
-                class="activity-btn" 
-                [class.active]="activityLevel === 'intense'"
-                (click)="setActivity('intense')">Intense</button>
-            </div>
-          </div>
+    </div>
+
+    <!-- Current Status Panel -->
+    <div class="panel">
+      <h2 class="panel-title">
+        Hydration Status
+      </h2>
+      
+      <div class="water-bottle">
+        <div class="water-level" [style.height.%]="progressPercentage"></div>
+      </div>
+      
+      <div class="hydration-level">
+        <div 
+          class="hydration-circle" 
+          [style.background]="hydrationStatus.color">
+          <span>{{ roundedPercentage }}%</span>
+        </div>
+        <div class="hydration-text">{{ hydrationStatus.text }}</div>
+      </div>
+
+      <div class="status-grid">
+        <div class="status-item">
+          <div class="status-value">{{ dailyWaterGoal || '--' }}</div>
+          <div class="status-label">Daily Goal (mL)</div>
+        </div>
+        <div class="status-item">
+          <div class="status-value">{{ remainingWater || '--' }}</div>
+          <div class="status-label">Remaining (mL)</div>
         </div>
       </div>
-  
-      <!-- Current Status Panel -->
-      <div class="panel">
-        <h2 class="panel-title">
-          Hydration Status
-        </h2>
-        
-        <div class="water-bottle">
-          <div class="water-level" [style.height.%]="progressPercentage"></div>
-        </div>
-        
-        <div class="hydration-level">
-          <div 
-            class="hydration-circle" 
-            [style.background]="hydrationStatus.color">
-            <span>{{ roundedPercentage }}%</span>
-          </div>
-          <div class="hydration-text">{{ hydrationStatus.text }}</div>
-        </div>
-  
-        <div class="status-grid">
-          <div class="status-item">
-            <div class="status-value">{{ dailyWaterGoal || '--' }}</div>
-            <div class="status-label">Daily Goal (mL)</div>
-          </div>
-          <div class="status-item">
-            <div class="status-value">{{ remainingWater || '--' }}</div>
-            <div class="status-label">Remaining (mL)</div>
-          </div>
-        </div>
-  
-        <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="progressPercentage"></div>
-        </div>
-        <div style="text-align: center; font-size: 0.9rem; color: #757575; margin-top: 5px;">
-          <span>{{ roundedPercentage }}% of daily goal</span>
+
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+      </div>
+      <div style="text-align: center; font-size: 0.9rem; color: #757575; margin-top: 5px;">
+        <span>{{ roundedPercentage }}% of daily goal</span>
+      </div>
+    </div>
+
+    <!-- Recommendations Panel -->
+    <div class="panel full-width">
+      <h2 class="panel-title">
+        Hydration Tips
+      </h2>
+      
+      <div>
+        <div *ngFor="let rec of recommendations" class="recommendation-card">
+          <div class="recommendation-title">{{ rec.title }}</div>
+          <div class="recommendation-text">{{ rec.text }}</div>
         </div>
       </div>
-  
-      <!-- Recommendations Panel -->
-      <div class="panel full-width">
-        <h2 class="panel-title">
-          Hydration Tips
-        </h2>
-        
-        <div>
-          <div *ngFor="let rec of recommendations" class="recommendation-card">
-            <div class="recommendation-title">{{ rec.title }}</div>
-            <div class="recommendation-text">{{ rec.text }}</div>
-          </div>
-        </div>
-      </div>
-    </main>
-    <app-footer
-    [background]="'linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)'"
-    [radiant]="'radial-gradient(circle, rgba(66, 165, 245, 0.4) 0%, transparent 70%)'">
-    </app-footer>
-  </div>
+    </div>
+  </main>
+  <app-footer
+  [background]="'linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)'"
+  [radiant]="'radial-gradient(circle, rgba(66, 165, 245, 0.4) 0%, transparent 70%)'">
+  </app-footer>
+</div>
