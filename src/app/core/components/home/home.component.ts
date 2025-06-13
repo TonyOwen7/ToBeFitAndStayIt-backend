@@ -2,12 +2,11 @@ import { Component } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { FooterComponent } from '../footer/footer.component';
 import { RouterLink } from '@angular/router';
-import { LoginModalComponent } from '../../../auth/login-modal/login-modal.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, HeaderComponent, FooterComponent, LoginModalComponent],
+  imports: [RouterLink, HeaderComponent, FooterComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -31,20 +30,6 @@ export class HomeComponent {
   isLoggedIn = false;
   userName = '';
 
-  openLoginModal() {
-    console.log('Login modal triggered'); // ✅ Confirm in browser dev console
-    this.showLoginModal = false;
-  }
-
-  onLoginModalClose() {
-    this.showLoginModal = false;
-  }
-
-  onLoginSuccess() {
-    this.isLoggedIn = true;
-    this.userName = 'Demo User';
-    alert('Welcome back! You can now access all features.');
-  }
 
   logout() {
     this.isLoggedIn = false;

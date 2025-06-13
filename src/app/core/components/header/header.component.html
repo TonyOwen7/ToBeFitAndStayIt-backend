@@ -1,14 +1,22 @@
 <header class="golden-header" [ngStyle]="{ 'background': background }">
   <div class="auth-section">
-    <button class="auth-btn" [ngStyle]="{'border' : border_auth_btn }" *ngIf="!isLoggedIn" (click)="onLoginClick()">Login</button>
+    <button class="auth-btn" [ngStyle]="{'border' : border_auth_btn }" *ngIf="!isLoggedIn" (click)="openLoginModal()">Login</button>
     <a [routerLink]="['/register']">
       <button class="auth-btn" [ngStyle]="{'border' : border_auth_btn }" *ngIf="!isLoggedIn" (click)="onRegisterClick()">Register</button>
     </a>
-        <button class="auth-btn" [ngStyle]="{'border' : border_auth_btn }" *ngIf="isLoggedIn">Logout</button>
+    <button class="auth-btn" [ngStyle]="{'border' : border_auth_btn }" *ngIf="isLoggedIn" (click)="logout()">Logout</button>
   </div>
   <a [routerLink]="['/']" style="text-decoration: none;">
     <h1 class="app-title">{{ title }}</h1>
   </a>
   <p class="app-subtitle">{{ subtitle }}</p>
   <div class="golden-radiant" [ngStyle]="{ 'background': radiant }"></div>
+
+  <!-- Login Modal integrated directly in header -->
+  <app-login-modal 
+    [bottomValue]="bottomValue"
+    [isOpen]="showLoginModal" 
+    (isclosed)="onLoginModalClose()"
+    (loginSuccess)="onLoginSuccess()">
+  </app-login-modal>
 </header>

@@ -1,5 +1,6 @@
 <div class="modal-overlay" [class.active]="isOpen" (click)="closeModal($event)">
-  <div class="modal-container" (click)="$event.stopPropagation()">
+  <div class="container" [ngStyle]="{'bottom' : bottomValue }">
+  <div class="modal-container" (click)="$event.stopPropagation()" >
     <!-- Header -->
     <div class="modal-header">
       <div class="header-glow"></div>
@@ -152,4 +153,5 @@
       </p>
     </div>
   </div>
+</div>
 </div>

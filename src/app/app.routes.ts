@@ -7,6 +7,7 @@ import { AppComponent } from './app.component';
 import { MetabolismComponent } from './features/metabolism/metabolism.component';
 import { HomeComponent } from './core/components/home/home.component';
 import { RegisterComponent } from './auth/register/register.component';
+import { LoginModalComponent } from './auth/login-modal/login-modal.component';
 
 export const routes: Routes = [
   { path: 'nutrition', component: NutritionComponent },

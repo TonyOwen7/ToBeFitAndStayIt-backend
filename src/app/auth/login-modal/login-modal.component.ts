@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth/auth.service';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login-modal',
@@ -10,8 +12,11 @@ import { FormsModule } from '@angular/forms';
 })
 export class LoginModalComponent {
   @Input() isOpen = false;
+  @Input() bottomValue: number | string = "auto";
   @Output() isclosed = new EventEmitter<void>();
   @Output() loginSuccess = new EventEmitter<void>();
+
+  constructor(private authService: AuthService, private router: Router) {}
 
   email = '';
   password = '';
@@ -35,7 +40,6 @@ export class LoginModalComponent {
     this.emailError = '';
     this.passwordError = '';
     this.loginError = '';
-
     let isValid = true;
 
     if (!this.email) {
@@ -57,17 +61,48 @@ export class LoginModalComponent {
     if (!isValid) return;
 
     this.isLoading = true;
+    
+    console.log('Attempting login with:', { email: this.email });
 
-    // Simulate API call
-    setTimeout(() => {
-      if (this.email === 'demo@tobefitandstayit.com' && this.password === 'demo123') {
+    this.authService.login({ email: this.email, password: this.password }).subscribe({
+      next: (res) => {
+        console.log('Login successful:', res);
+        
+        // Store tokens
+        if (res.access) {
+          localStorage.setItem('accessToken', res.access);
+        }
+        if (res.refresh) {
+          localStorage.setItem('refreshToken', res.refresh);
+        }
+        
+        // Store user info
+        if (res.user) {
+          localStorage.setItem('user', JSON.stringify(res.user));
+        }
+
+        this.isLoading = false;
         this.loginSuccess.emit();
         this.close();
-      } else {
-        this.loginError = 'Invalid email or password. Try: demo@tobefitandstayit.com / demo123';
+      },
+      error: (err) => {
+        console.error('Login failed:', err);
+        this.isLoading = false;
+        
+        // Handle different types of errors
+        if (err.error) {
+          if (err.error.non_field_errors && Array.isArray(err.error.non_field_errors)) {
+            this.loginError = err.error.non_field_errors[0];
+          } else if (typeof err.error === 'string') {
+            this.loginError = err.error;
+          } else {
+            this.loginError = 'Login failed. Please check your credentials.';
+          }
+        } else {
+          this.loginError = 'Login failed. Please check your connection.';
+        }
       }
-      this.isLoading = false;
-    }, 1500);
+    });
   }
 
   socialLogin(provider: string) {
@@ -75,7 +110,7 @@ export class LoginModalComponent {
   }
 
   switchToRegister() {
-    alert('Registration modal would be shown here.');
+    this.router.navigate(['/register']);
     this.close();
   }
 

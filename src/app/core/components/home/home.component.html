@@ -1,25 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ToBeFitAndStayIt</title>
-</head>
-<body>
+
     <div class="bg-particles" id="particles"></div>
     
     <div class="app-container">
-        <app-header
-        [isLoggedIn]="isLoggedIn"
-        [title]="'ToBeFitAndStayIt'"
-        [subtitle]="'Your Complete Wellness Journey'"
-        [background]="'linear-gradient(135deg, #ffd700 0%, #ffb347 30%, #ffa500 70%, #ff8f00 100%)'"
-        [radiant]="'radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%)'"
-        [border_auth_btn]="'2px solid rgba(255, 215, 0, 0.6)'",
-        (loginClicked)="openLoginModal()"
-        >
-      </app-header>
-      
+        <app-header></app-header>
+         
         <main class="main-content">
             <div class="stats-overview">
                 <div class="stat-item">
@@ -112,18 +96,4 @@
 
     </div>
 
-    <!-- DEBUG ONLY -->
-<p style="position: fixed; bottom: 10px; right: 10px; background: black; color: lime; padding: 5px;">
-    Modal Status: {{ showLoginModal }}
-  </p>
-  
-
-   <!-- Add at the bottom of the file -->
-    <app-login-modal 
-    [isOpen]="showLoginModal" 
-    (isclosed)="onLoginModalClose()"
-    (loginSuccess)="onLoginSuccess()">
-    </app-login-modal>
-
-</body>
-</html>
+    
