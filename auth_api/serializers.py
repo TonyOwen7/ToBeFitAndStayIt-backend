@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from .models import CustomUser
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import authenticate
+from django.utils.translation import gettext_lazy as _
+from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password
+
+User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(write_only=True)
@@ -29,3 +35,29 @@ class RegisterSerializer(serializers.ModelSerializer):
         validated_data.pop('confirm_password')
         user = CustomUser.objects.create_user(**validated_data)
         return user
+
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        email = attrs.get("email")
+        password = attrs.get("password")
+        User = get_user_model()
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError(
+                {"non_field_errors": [_("Invalid email or password.")]}
+            )
+
+        if not check_password(password, user.password):
+            raise serializers.ValidationError(
+                {"non_field_errors": [_("Invalid email or password.")]}
+            )
+
+        attrs['user'] = user
+        return attrs
