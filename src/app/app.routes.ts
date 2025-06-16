@@ -8,6 +8,7 @@ import { MetabolismComponent } from './features/metabolism/metabolism.component'
 import { HomeComponent } from './core/components/home/home.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { LoginModalComponent } from './auth/login-modal/login-modal.component';
+import { AboutComponent } from './features/about/about.component';
 
 export const routes: Routes = [
   { path: 'nutrition', component: NutritionComponent },
@@ -15,6 +16,8 @@ export const routes: Routes = [
   { path: 'sleep', component: SleepComponent },
   { path: 'metabolism', component: MetabolismComponent },
   { path: 'home', component : HomeComponent },
-  { path: 'register', component: RegisterComponent }, // Main app component route
+  { path: 'login', component: LoginModalComponent }, 
+  { path: 'register', component: RegisterComponent }, 
+  { path: 'about', component: AboutComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' } // Redirect to home on empty path,
 ];

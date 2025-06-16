@@ -1,22 +1,99 @@
 <header class="golden-header" [ngStyle]="{ 'background': background }">
-  <div class="auth-section">
-    <button class="auth-btn" [ngStyle]="{'border' : border_auth_btn }" *ngIf="!isLoggedIn" (click)="openLoginModal()">Login</button>
-    <a [routerLink]="['/register']">
-      <button class="auth-btn" [ngStyle]="{'border' : border_auth_btn }" *ngIf="!isLoggedIn" (click)="onRegisterClick()">Register</button>
-    </a>
-    <button class="auth-btn" [ngStyle]="{'border' : border_auth_btn }" *ngIf="isLoggedIn" (click)="logout()">Logout</button>
-  </div>
-  <a [routerLink]="['/']" style="text-decoration: none;">
+  <!-- Mobile Hamburger Button -->
+  <button class="nav-toggle" (click)="toggleMobileNav()" [class.active]="isMobileNavOpen">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- App Title -->
+  <a [routerLink]="['/']" class="app-title-link">
     <h1 class="app-title">{{ title }}</h1>
   </a>
   <p class="app-subtitle">{{ subtitle }}</p>
+
+  <!-- Spinning Radiant Background -->
   <div class="golden-radiant" [ngStyle]="{ 'background': radiant }"></div>
 
-  <!-- Login Modal integrated directly in header -->
-  <app-login-modal 
+  <!-- Navigation -->
+  <nav class="header-navigation" [class.mobile-open]="isMobileNavOpen">
+    <!-- Authenticated Navigation -->
+    <a
+      *ngIf="isLoggedIn"
+      [routerLink]="['/dashboard']"
+      class="auth-btn nav-link"
+      routerLinkActive="active"
+      (click)="closeMobileNav()"
+      [ngStyle]="{'border': border_auth_btn}"
+    >
+      <i class="fas fa-chart-line"></i> Dashboard
+    </a>
+    <a
+      *ngIf="isLoggedIn"
+      [routerLink]="['/wellness-tips']"
+      class="auth-btn nav-link"
+      routerLinkActive="active"
+      (click)="closeMobileNav()"
+      [ngStyle]="{'border': border_auth_btn}"
+    >
+      <i class="fas fa-leaf"></i> Wellness Tips
+    </a>
+    <a
+      *ngIf="isLoggedIn"
+      [routerLink]="['/about']"
+      class="auth-btn nav-link"
+      routerLinkActive="active"
+      (click)="closeMobileNav()"
+      [ngStyle]="{'border': border_auth_btn}"
+    >
+      <i class="fas fa-info-circle"></i> About
+    </a>
+    <a
+      *ngIf="isLoggedIn"
+      [routerLink]="['/settings']"
+      class="auth-btn nav-link"
+      routerLinkActive="active"
+      (click)="closeMobileNav()"
+      [ngStyle]="{'border': border_auth_btn}"
+    >
+      <i class="fas fa-cog"></i> Settings
+    </a>
+
+    <!-- Auth Buttons -->
+    <div class="auth-buttons-container">
+      <button
+        *ngIf="!isLoggedIn"
+        class="auth-btn login-register-btn"
+        (click)="openLoginModal(); closeMobileNav()"
+        [ngStyle]="{'border': border_auth_btn}"
+      >
+        <i class="fas fa-sign-in-alt"></i> Login
+      </button>
+      <button
+        *ngIf="!isLoggedIn"
+        class="auth-btn login-register-btn"
+        (click)="onRegisterClick(); closeMobileNav()"
+        [ngStyle]="{'border': border_auth_btn}"
+      >
+        <i class="fas fa-user-plus"></i> Register
+      </button>
+      <button
+        *ngIf="isLoggedIn"
+        class="auth-btn"
+        (click)="logout(); closeMobileNav()"
+        [ngStyle]="{'border': border_auth_btn}"
+      >
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </nav>
+
+  <!-- Login Modal -->
+  <app-login-modal
     [bottomValue]="bottomValue"
-    [isOpen]="showLoginModal" 
+    [isOpen]="showLoginModal"
+    [isRegisterMode]="isRegisterMode"
     (isclosed)="onLoginModalClose()"
-    (loginSuccess)="onLoginSuccess()">
-  </app-login-modal>
+    (loginSuccess)="onLoginSuccess()"
+  ></app-login-modal>
 </header>

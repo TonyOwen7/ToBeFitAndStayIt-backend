@@ -1,60 +1,68 @@
 .golden-header {
     position: relative;
-    padding: 50px 30px 30px;
+    padding: 20px 0 30px;
     text-align: center;
     overflow: hidden;
-}
-
-.golden-radiant {
+  }
+  
+  .golden-radiant {
     position: absolute;
     top: -50%;
     left: -50%;
     width: 200%;
     height: 200%;
     animation: rotate 12s linear infinite;
-}
-
-@keyframes rotate {
+    z-index: 1000;
+  }
+  
+  @keyframes rotate {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-
-.app-title {
+  }
+  
+  .app-title {
     font-size: 4rem;
     font-weight: 900;
     color: #1a1a2e;
     text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
     position: relative;
-    z-index: 2;
+    z-index: 1001;
     letter-spacing: 4px;
-    margin-bottom: 15px;
+    margin: 15px 0;
     cursor: pointer;
     transition: transform 0.3s ease;
-}
+  }
+  
+  .app-title-link {
+    text-decoration: none;
+  }
 
-.app-title:hover {
+  .app-title:hover {
     transform: scale(1.05);
-}
-
-.app-subtitle {
+  }
+  
+  .app-subtitle {
     font-size: 1.5rem;
     color: #2F4F2F;
     position: relative;
     z-index: 2;
     font-weight: 600;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.auth-section {
-    position: absolute;
+  }
+  
+  .header-navigation {
+    position: relative;
     top: 20px;
-    right: 30px;
-    z-index: 10;
+    z-index: 1001;
     display: flex;
     gap: 15px;
-}
-
-.auth-btn {
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .auth-btn {
     background: rgba(255, 255, 255, 0.9);
     color: #689f38;
     padding: 12px 24px;
@@ -64,28 +72,196 @@
     transition: all 0.3s ease;
     font-size: 0.9rem;
     backdrop-filter: blur(10px);
-}
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+  }
+  
+  .auth-btn i {
+    margin-right: 8px;
+    font-size: 1rem;
+    vertical-align: middle;
+  }  
 
-.auth-btn:hover {
+  .auth-btn:hover {
     background: rgba(255, 215, 0, 0.9);
     color: #1a1a2e;
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
-}
-
-@media (max-width: 768px) {
+  }
+  
+  .nav-link {
+    cursor: pointer;
+  }
+  
+  .nav-link.active {
+    background: rgba(104, 159, 56, 0.9);
+    color: white !important;
+    border-color: rgba(255, 215, 0, 0.8) !important;
+  }
+  
+  /* Auth buttons container for desktop spacing */
+  .auth-buttons-container {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  /* Add margin for login/register buttons on desktop */
+  .login-register-btn {
+    margin-left: 20px;
+  }
+  
+  .login-register-btn:first-child {
+    margin-left: 30px;
+  }
+  
+  /* Mobile Navigation Toggle */
+  .nav-toggle {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    padding: 0 10px;
+    top: 20px;
+    right: 20px;
+    z-index: 1002;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    z-index: 1003;
+  }
+  
+  .nav-toggle span {
+    width: 35px;
+    height: 3px;
+    background: #689f38;
+    margin: 3px 0;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+  }
+  
+  .nav-toggle:hover {
+    background: rgba(255, 215, 0, 0.9);
+  }
+  
+  .nav-toggle:hover span {
+    background: #1a1a2e;
+  }
+  
+  /* Hamburger animation */
+  .nav-toggle.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+  }
+  
+  .nav-toggle.active span:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .nav-toggle.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+  }
+  
+  a {
+    z-index: 1002;
+  }
+  
+  /* Media Queries */
+  @media (max-width: 800px) {
     .golden-header {
-        border-radius: 0;
-        padding: 40px 20px 30px;
+      border-radius: 0;
+      padding: 40px 20px 30px;
     }
-    
+  
     .app-title {
-        font-size: 3rem;
+      font-size: 3rem;
+    }
+  
+    /* Show mobile toggle */
+    .nav-toggle {
+      display: flex;
+    }
+  
+    /* Hide navigation by default on mobile */
+    .header-navigation {
+      position: fixed;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100vh;
+      background: rgba(255, 255, 255, 0.80);
+      /* backdrop-filter: blur(15px); */
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 25px;
+      transition: left 0.3s ease;
+      z-index: 1002;
+      margin-bottom: 20px;
+      /* background-color: rgba(104, 159, 56, 0.9); */
+    }
+  
+    /* Show navigation when mobile menu is open */
+    .header-navigation.mobile-open {
+      left: 0;
+    }
+  
+    .auth-btn {
+      font-size: 1rem;
+      padding: 15px 30px;
+      z-index: 1002;
+      width: 200px;
+      text-align: center;
+    }
+  
+    /* Reset desktop margins on mobile */
+    .login-register-btn {
+      margin-left: 0;
+    }
+  
+    .login-register-btn:first-child {
+      margin-left: 0;
+    }
+  
+    .auth-buttons-container {
+      flex-direction: column;
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 550px) {
+    .app-title {
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+    }
+  
+    .app-subtitle {
+      font-size: 1.2rem;
+    }
+  
+    .auth-btn {
+      width: 180px;
+      padding: 12px 20px;
+      font-size: 0.9rem;
+    }
+  
+    .nav-toggle {
+      top: 15px;
+      right: 15px;
+    }
+  
+    .nav-toggle span {
+      width: 30px;
+    }
+  
+    .nav-toggle.active span:nth-child(1){
+        transform: rotate(45deg) translate(6px, 7px);
     }
 
-    .auth-section {
-        position: static;
-        justify-content: center;
-        margin-top: 20px;
-    }
-}
+    .nav-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -7px);
+      }
+  }

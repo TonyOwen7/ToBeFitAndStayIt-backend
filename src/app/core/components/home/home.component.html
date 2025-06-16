@@ -1,5 +1,3 @@
-
-    <div class="bg-particles" id="particles"></div>
     
     <div class="app-container">
         <app-header></app-header>
@@ -73,16 +71,22 @@
                     Currently, <strong>ToBeFitAndStayIt does not have a mobile app</strong>. 
                     We're exploring the possibility of developing a comprehensive mobile application to bring all these wellness features to your smartphone.
                 </p>
-                <div class="app-interest-section">
+                <div class="app-interest-section" *ngIf="!interestResponse">
                     <h3>Would you be interested in a mobile app?</h3>
-                    <p style="margin: 15px 0; font-size: 1.1rem;">Your feedback helps us prioritize development efforts!</p>
+                    <p style="margin: 15px 0; font-size: 1.1rem;">
+                      Your feedback helps us prioritize development efforts!
+                    </p>
                     <div class="interest-buttons">
-                        <button class="interest-btn" onclick="selectInterest('yes', this)">Yes, I'd like an app!</button>
-                        <button class="interest-btn" onclick="selectInterest('maybe', this)">Maybe, tell me more</button>
-                        <button class="interest-btn" onclick="selectInterest('no', this)">No, web version is fine</button>
+                      <button class="interest-btn" (click)="submitAppInterest('yes')">Yes, I'd like an app!</button>
+                      <button class="interest-btn" (click)="submitAppInterest('maybe')">Maybe, tell me more</button>
+                      <button class="interest-btn" (click)="submitAppInterest('no')">No, web version is fine</button>
                     </div>
-                    <div id="interest-feedback" style="margin-top: 20px; font-size: 1.1rem; display: none;"></div>
-                </div>
+                  </div>
+                  
+                  <div *ngIf="interestResponse" id="interest-feedback" style="margin-top: 20px; font-size: 1.1rem;">
+                    {{ interestResponse }}
+                  </div>
+                  
             </div>
             
             <div class="importance-section">
@@ -95,5 +99,3 @@
         <app-footer></app-footer>
 
     </div>
-
-    

@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
+import { AuthStateService } from '../../services/auth-state/auth-state.service';
 
 @Component({
   selector: 'app-register',
@@ -58,6 +59,7 @@ export class RegisterComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private authState: AuthStateService,
     private router: Router
   ) { }
 
@@ -266,11 +268,6 @@ export class RegisterComponent implements OnInit {
     this.showLoginModal = false;
   }
 
-  onLoginSuccess(): void {
-    console.log('Login successful in register');
-    this.showLoginModal = false;
-    this.loginSuccess.emit();
-  }
 
   private isFormValid(): boolean {
     return !!(
