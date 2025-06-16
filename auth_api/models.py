@@ -12,3 +12,19 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email or self.username
+
+class AdviceCategory(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+    def tip_count(self):
+        return self.tips.count()
+
+class WellnessTip(models.Model):
+    category = models.ForeignKey(AdviceCategory, on_delete=models.CASCADE, related_name='tips')
+    content = models.TextField()
+
+    def __str__(self):
+        return f"{self.category.name}: {self.content[:30]}"

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'auth_api',
+    'app_interest',
 ]
 
 MIDDLEWARE = [
@@ -57,10 +58,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'wellness_core.urls'
 
+import os
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
