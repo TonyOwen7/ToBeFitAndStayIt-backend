@@ -40,9 +40,20 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'auth_api',
     'app_interest',
+    'settings',
+    'foods_and_drinks',
 ]
+
+SIMPLE_JWT = {
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "BLACKLIST_AFTER_ROTATION": True,
+    'ROTATE_REFRESH_TOKENS': True,
+}
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -55,6 +66,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
 
 ROOT_URLCONF = 'wellness_core.urls'
 
@@ -131,10 +151,42 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'auth_api.CustomUser'
+AUTH_USER_MODEL = 'auth_api.CustomUser'  
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",  
     "http://127.0.0.1:4200",
-
 ]
+
+CORS_ALLOW_CREDENTIALS = True
+
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',  # or your preferred database
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+# Logging configuration (optional but helpful for debugging)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'moubouyitony@gmail.com'
+EMAIL_HOST_PASSWORD = 'mosw fesk djkn sikc '  # Use App Password, not your real Gmail password
