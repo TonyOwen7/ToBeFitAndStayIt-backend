@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStateService } from '../../services/auth-state/auth-state.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -58,6 +59,7 @@ export class RegisterComponent implements OnInit {
   calculatedTDEE: number = 0;
 
   constructor(
+    private http : HttpClient,
     private authService: AuthService,
     private authState: AuthStateService,
     private router: Router
@@ -104,23 +106,47 @@ export class RegisterComponent implements OnInit {
       console.log('Sending registration data:', registrationData);
 
       this.authService.register(registrationData).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           console.log('Registration successful:', res);
           this.isLoading = false;
           this.showSuccess = true;
           
+          // NEW: Handle auto-login after registration
+          if (res && res.access) {
+            // User is now automatically logged in
+            const userProfile = {
+              id: res.user?.id,
+              username: res.user?.username || this.username,
+              email: res.user?.email || this.email,
+              firstName: res.user?.first_name || this.firstName,
+              lastName: res.user?.last_name || this.lastName,
+              avatar: res.user?.avatar
+            };
+            
+            // Update AuthStateService with token and user profile
+            this.authState.login(res.access, userProfile);
+            console.log('User automatically logged in after registration');
+            
+            // Emit login success event
+            this.loginSuccess.emit();
+          }
+          
           if (this.calculatedBMR > 0 && this.calculatedTDEE > 0) {
             this.showResults = true;
+            // Show results for a few seconds, then navigate to dashboard
+            setTimeout(() => {
+              this.showResults = false;
+              this.router.navigate(['/dashboard']);
+            }, 5000);
+          } else {
+            // Navigate to dashboard after success message
+            setTimeout(() => {
+              this.showSuccess = false;
+              this.router.navigate(['/dashboard']);
+            }, 3000);
           }
           
           this.resetForm();
-          
-          setTimeout(() => {
-            this.showSuccess = false;
-            if (!this.showResults) {
-              this.router.navigate(['/login']);
-            }
-          }, 5000);
         },
         error: (err) => {
           console.error('Registration failed:', err);
@@ -203,7 +229,7 @@ export class RegisterComponent implements OnInit {
 
   closeResults(): void {
     this.showResults = false;
-    this.router.navigate(['/login']);
+    this.router.navigate(['/dashboard']);
   }
 
   togglePasswordVisibility(): void {
@@ -244,19 +270,25 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  socialRegister(provider: string): void {
-    console.log(`Register with ${provider}`);
-    this.isLoading = true;
-    
-    setTimeout(() => {
-      this.isLoading = false;
-      this.showSuccess = true;
-      
-      setTimeout(() => {
-        this.showSuccess = false;
-      }, 3000);
-    }, 1500);
-  }
+  // async socialRegister(provider: string) {
+  //   if (provider === 'apple') {
+  //     try {
+  //       // Initiate Apple registration
+  //       const authResponse: any = await this.http.post(
+  //         '/auth/apple/register/', 
+  //         { redirect_uri: window.location.origin }
+  //       ).toPromise();
+  
+  //       // Redirect to Apple's auth page
+  //       window.location.href = authResponse.authorization_url;
+  //     } catch (error) {
+  //       console.error('Apple registration failed:', error);
+  //       this.errorMessage = 'Failed to initiate Apple registration';
+  //     }
+  //   } else {
+  //     alert(`${provider} registration would be implemented similarly`);
+  //   }
+  // }
 
   openLoginModal(): void {
     console.log('Opening login modal from register');
@@ -268,6 +300,12 @@ export class RegisterComponent implements OnInit {
     this.showLoginModal = false;
   }
 
+  onLoginModalSuccess(): void {
+    console.log('Login successful from modal');
+    this.showLoginModal = false;
+    this.loginSuccess.emit();
+    this.router.navigate(['/dashboard']);
+  }
 
   private isFormValid(): boolean {
     return !!(

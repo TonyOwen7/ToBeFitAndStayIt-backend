@@ -6,6 +6,8 @@ import { Router, RouterLink } from '@angular/router';
 import { LoginModalComponent } from '../../../auth/login-modal/login-modal.component';
 import { AuthStateService, UserProfile } from '../../../services/auth-state/auth-state.service';
 import { Subscription } from 'rxjs';
+import { get } from 'node:http';
+import { AuthService } from '../../../services/auth/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -37,7 +39,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router, 
-    private authState: AuthStateService
+    private authState: AuthStateService,
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -108,7 +111,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
   logout() {
     console.log('Logout clicked');
     this.authState.logout(); // This will automatically update isLoggedIn via subscription
-    this.logoutClicked.emit(); // Emit to parent component for additional actions
+    const refreshToken = this.authService.getRefreshToken();
+
+    this.authService.logout(refreshToken).subscribe({
+      next: () => {
+        localStorage.clear(); // clear all auth stuff
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        localStorage.clear(); // fallback
+        this.router.navigate(['/']);
+      }
+    });    
   }
 
   // Navigation methods

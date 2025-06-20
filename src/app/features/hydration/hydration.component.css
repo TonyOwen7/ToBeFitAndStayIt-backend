@@ -503,3 +503,464 @@ body {
         flex-wrap: wrap;
     }
 }
+
+/* Add these styles to your existing CSS */
+/* Recommendations Panel Styling */
+.recommendations-list {
+    margin-top: 15px;
+  }
+  
+  .recommendation-item {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%);
+    border-radius: 12px;
+    margin-bottom: 15px;
+  }
+  
+  .rec-icon {
+    font-size: 24px;
+    color: #ffc107;
+  }
+  
+  .rec-content {
+    flex: 1;
+  }
+  
+  .rec-title {
+    font-weight: 600;
+    color: #0277bd;
+    margin-bottom: 5px;
+  }
+  
+  .rec-text {
+    color: #0288d1;
+    font-size: 0.95rem;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #757575;
+    font-style: italic;
+  }
+  
+  /* Status Display Enhancements */
+  .hydration-status h3 {
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+    color: #1565c0;
+  }
+  
+  .daily-goal-display {
+    text-align: center;
+    font-weight: 600;
+    color: #1976d2;
+    margin-top: 15px;
+    padding: 10px;
+    background: #e3f2fd;
+    border-radius: 8px;
+  }
+  
+  /* Tab Navigation Styling */
+  .tab-navigation {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 15px;
+  }
+  
+  .tab-btn {
+    padding: 10px 15px;
+    background: #e3f2fd;
+    border: none;
+    border-radius: 20px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .tab-btn.active {
+    background: #42a5f5;
+    color: white;
+  }
+  
+  /* Section Titles */
+  .section-title {
+    font-size: 1.1rem;
+    color: #1565c0;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  /* Preview Sections */
+  .drink-preview, .food-preview {
+    padding: 15px;
+    background: #e8f5e9;
+    border-radius: 10px;
+    margin: 15px 0;
+  }
+  
+  .preview-info strong {
+    color: #2e7d32;
+  }
+  
+  .preview-details {
+    color: #757575;
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+  
+  /* Loading Spinner */
+  .loading-spinner {
+    text-align: center;
+    padding: 20px;
+    color: #42a5f5;
+    font-weight: 500;
+  }
+  
+  /* Water List Improvements */
+  .water-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .water-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+  }
+  
+  .water-item:hover {
+    background: #e3f2fd;
+    transform: translateY(-2px);
+  }
+  
+  .item-icon {
+    font-size: 24px;
+    margin-right: 15px;
+  }
+  
+  .water-info {
+    flex: 1;
+  }
+  
+  .water-name {
+    font-weight: 600;
+    color: #1565c0;
+  }
+  
+  .water-details {
+    font-size: 0.9rem;
+    color: #757575;
+  }
+  
+  .calories-info {
+    color: #f57c00;
+    font-weight: 500;
+  }
+  
+  .water-amount {
+    font-weight: 700;
+    color: #42a5f5;
+    margin: 0 15px;
+  }
+  
+  .remove-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #d32f2f;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .remove-btn:hover {
+    transform: scale(1.1);
+  }
+/* hydration.component.css */
+/* Add to existing styles */
+.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  .health-insights-panel {
+    background: white;
+    border-top: 3px solid #42a5f5;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e3f2fd;
+    transition: all 0.3s ease;
+  }
+  
+  .health-insights-panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+  }
+  
+  .insights-intro {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0f7fa;
+  }
+  
+  .health-indicators {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+  }
+  
+  .indicator {
+    display: flex;
+    padding: 20px;
+    background: #f5fbff;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+    border: 1px solid #e3f2fd;
+    box-shadow: 0 3px 10px rgba(66, 165, 245, 0.1);
+  }
+  
+  .indicator:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(66, 165, 245, 0.2);
+  }
+  
+  .indicator-icon {
+    font-size: 28px;
+    margin-right: 15px;
+    align-self: flex-start;
+    padding-top: 5px;
+  }
+  
+  .indicator-details {
+    flex: 1;
+  }
+  
+  .indicator-name {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #1565c0;
+    font-weight: 600;
+  }
+  
+  .indicator-status {
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    display: inline-block;
+    font-size: 14px;
+    background: #e3f2fd;
+    color: #0d47a1;
+  }
+  
+  .indicator-description {
+    margin: 0;
+    font-size: 14px;
+    color: #546e7a;
+    line-height: 1.5;
+  }
+  
+  .hydration-tips {
+    background: #e3f2fd;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 4px solid #42a5f5;
+  }
+  
+  .hydration-tips h3 {
+    margin-top: 0;
+    color: #1565c0;
+    margin-bottom: 15px;
+    font-size: 18px;
+  }
+  
+  .hydration-tips ul {
+    padding-left: 20px;
+  }
+  
+  .hydration-tips li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+    color: #37474f;
+  }
+  
+  /* Status color coding */
+  .indicator-status.negative {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+  
+  .indicator-status.positive {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .health-indicators {
+      grid-template-columns: 1fr;
+    }
+    
+    .indicator {
+      padding: 15px;
+    }
+  }
+
+  /* hydration.component.css */
+/* Overhydration Styles */
+.overhydration-alert {
+    background: #fff3e0;
+    border: 2px solid #ff9800;
+    border-radius: 10px;
+    padding: 12px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+  }
+  
+  .alert-icon {
+    font-size: 24px;
+    margin-right: 10px;
+    color: #f57c00;
+  }
+  
+  .alert-content {
+    font-weight: 600;
+    color: #e65100;
+  }
+  
+  .overhydration-consequences {
+    background: #fbe9e7;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    border-left: 4px solid #d32f2f;
+  }
+  
+  .consequences-title {
+    color: #c62828;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+  }
+  
+  .overhydration-consequences ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .overhydration-consequences li {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 6px;
+  }
+  
+  .warning-icon {
+    font-size: 18px;
+    margin-right: 10px;
+    color: #d32f2f;
+    min-width: 20px;
+  }
+  
+  .warning-text {
+    flex: 1;
+  }
+  
+  .hydration-advice {
+    background: #e8f5e9;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 15px;
+    font-size: 0.95rem;
+    border-left: 3px solid #4caf50;
+  }
+  
+  /* Overhydration indicators */
+  .overhydrated {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .overhydrated::after {
+    content: "⚠️";
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 24px;
+    animation: blink 1.5s infinite;
+  }
+  
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+  }
+  
+  .overhydrated-text {
+    color: #9c27b0;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .overhydrated-text::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #9c27b0;
+    animation: underline-pulse 1.5s infinite;
+  }
+  
+  @keyframes underline-pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+  }
+  
+  /* Water bottle for overhydration */
+  .water-bottle.overhydrated-bottle {
+    position: relative;
+  }
+  
+  .water-bottle.overhydrated-bottle::after {
+    content: "⚠️ OVERHYDRATION ⚠️";
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    background: #d32f2f;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    animation: bounce 0.8s infinite alternate;
+  }
+  
+  @keyframes bounce {
+    from { top: -30px; }
+    to { top: -35px; }
+  }

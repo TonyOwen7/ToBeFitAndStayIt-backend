@@ -1,10 +1,13 @@
 // login-modal.component.ts
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth/auth.service';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthStateService } from '../../services/auth-state/auth-state.service';
+import { HttpClient } from '@angular/common/http';
+import { isPlatformBrowser } from '@angular/common';
+import { Inject, PLATFORM_ID } from '@angular/core';
 
 @Component({
   selector: 'app-login-modal',
@@ -12,14 +15,20 @@ import { AuthStateService } from '../../services/auth-state/auth-state.service';
   templateUrl: './login-modal.component.html',
   styleUrls: ['./login-modal.component.css']
 })
-export class LoginModalComponent {
+export class LoginModalComponent implements OnInit{
   @Input() isOpen = false;
   @Input() bottomValue: number | string = "auto";
   @Input() isRegisterMode = false;
   @Output() isclosed = new EventEmitter<void>();
   @Output() loginSuccess = new EventEmitter<void>();
 
-  constructor(private authService: AuthService, private authState: AuthStateService, private router: Router) {}
+  constructor(
+    private http: HttpClient, 
+    private authService: AuthService,
+    private authState: AuthStateService, 
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   // Form fields
   email = '';
@@ -29,6 +38,10 @@ export class LoginModalComponent {
   passwordVisible = false;
   confirmPasswordVisible = false;
   isLoading = false;
+  isForgotPasswordMode = false;
+  forgotPasswordEmail = '';
+  forgotPasswordSuccess = false;
+  forgotPasswordError = '';
 
   // Error messages
   emailError = '';
@@ -39,6 +52,45 @@ export class LoginModalComponent {
   // Validation patterns
   private emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   private passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+
+  ngOnInit(): void {
+    // if (isPlatformBrowser(this.platformId)) {
+    //   const remembered = localStorage.getItem('rememberedEmail');
+    //   if (remembered) this.email = remembered;
+    // }
+  }
+
+  switchToForgotPassword() {
+    this.router.navigate(['/forgot-password']);
+    this.isForgotPasswordMode = true;
+
+    this.resetForm();
+  }
+
+  // Handle forgot password submission
+  onForgotPasswordSubmit() {
+    this.forgotPasswordError = '';
+    const validation = this.validateEmail(this.forgotPasswordEmail);
+    
+    if (!validation.isValid) {
+      this.forgotPasswordError = validation.message;
+      return;
+    }
+
+    this.isLoading = true;
+    this.authService.forgotPassword(this.forgotPasswordEmail).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.forgotPasswordSuccess = true;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.forgotPasswordError = 'Failed to send reset email. Please try again.';
+      }
+    });
+
+    this.router.navigate(['/forgot-password']);
+  }
 
   togglePasswordVisibility() {
     this.passwordVisible = !this.passwordVisible;
@@ -120,6 +172,12 @@ export class LoginModalComponent {
   }
 
   onSubmit() {
+    // if (this.rememberMe) {
+    //   localStorage.setItem('rememberedEmail', this.email);
+    // } else {
+    //   localStorage.removeItem('rememberedEmail');
+    // }
+    
     // Clear previous errors
     this.emailError = '';
     this.passwordError = '';
@@ -154,7 +212,7 @@ export class LoginModalComponent {
     if (!isValid) return;
 
     this.isLoading = true;
-    console.log('Attempting login with:', { email: this.email });
+    console.log('Attempting authentication with:', { email: this.email });
 
     // Choose the appropriate service method based on mode
     const authCall = this.isRegisterMode 
@@ -169,13 +227,13 @@ export class LoginModalComponent {
       : this.authService.login({ email: this.email, password: this.password });
 
     authCall.subscribe({
-      next: (res) => {
+      next: (res: any) => {
         console.log(`${this.isRegisterMode ? 'Registration' : 'Login'} successful:`, res);
         
         this.isLoading = false;
         
-        // THIS IS THE KEY FIX: Update the AuthStateService with the login data
-        if (res && res.token) {
+        // Handle authentication response - both login and register now return tokens
+        if (res && res.access) {
           // Create user profile from response
           const userProfile = {
             id: res.user?.id || res.id,
@@ -187,23 +245,23 @@ export class LoginModalComponent {
           };
           
           // Update AuthStateService with token and user profile
-          this.authState.login(res.token, userProfile);
+          this.authState.login(res.access, userProfile);
           console.log('AuthStateService updated with login data');
         } else {
-          console.warn('Login response missing token or user data:', res);
-          // If no token in response, still try to update auth state
+          console.warn('Authentication response missing token or user data:', res);
+          // Fallback for unexpected response format
           const userProfile = {
             username: this.email.split('@')[0],
             email: this.email
           };
           this.authState.login('dummy-token', userProfile);
         }
-        
-        // Emit success event to parent component
-        this.loginSuccess.emit();
-        
+                
         // Close modal
         this.close();
+        
+        // Navigate to dashboard or home page
+        this.router.navigate(['/home']);
       },
       error: (err) => {
         console.error(`${this.isRegisterMode ? 'Registration' : 'Login'} failed:`, err);
@@ -235,16 +293,36 @@ export class LoginModalComponent {
     });
   }
 
-  socialLogin(provider: string) {
-    alert(`${provider.charAt(0).toUpperCase() + provider.slice(1)} login would be implemented here.`);
-  }
+  // async socialLogin(provider: string) {
+  //   if (provider === 'apple') {
+  //     try {
+  //       // Initiate Apple authentication
+  //       const authResponse: any = await this.http.post(
+  //         '/auth/apple/login/', 
+  //         { redirect_uri: window.location.origin }
+  //       ).toPromise();
+  
+  //       // Redirect to Apple's auth page
+  //       window.location.href = authResponse.authorization_url;
+  //     } catch (error) {
+  //       console.error('Apple login failed:', error);
+  //       this.loginError = 'Failed to initiate Apple login';
+  //     }
+  //   } else {
+  //     alert(`${provider} login would be implemented similarly`);
+  //   }
+  // }
 
   switchToRegister() {
-    this.isRegisterMode = true;
-    this.resetForm();
+    this.isOpen = false;
+    this.router.navigate(['/register']);
+
+    // this.isRegisterMode = true; 
+    // this.resetForm();
   }
 
   switchToLogin() {
+    this.isForgotPasswordMode = false;
     this.isRegisterMode = false;
     this.resetForm();
   }
@@ -272,6 +350,10 @@ export class LoginModalComponent {
     this.passwordError = '';
     this.confirmPasswordError = '';
     this.loginError = '';
+    this.isForgotPasswordMode = false;
+    this.forgotPasswordEmail = '';
+    this.forgotPasswordSuccess = false;
+    this.forgotPasswordError = '';
   }
 
   // Helper method to get password strength indicator
@@ -290,4 +372,5 @@ export class LoginModalComponent {
     if (score < 5) return { strength: 'Strong', color: '#10b981', width: '75%' };
     return { strength: 'Very Strong', color: '#059669', width: '100%' };
   }
+
 }

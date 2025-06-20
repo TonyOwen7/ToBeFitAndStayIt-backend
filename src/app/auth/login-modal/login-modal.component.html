@@ -198,11 +198,11 @@
 
           <!-- Remember Me & Forgot Password (only show in login mode) -->
           <div class="form-options" *ngIf="!isRegisterMode">
-            <label class="checkbox-wrapper">
-              <input type="checkbox" id="rememberMe" name="rememberMe" [(ngModel)]="rememberMe">
+            <label class="checkbox-wrapper" style="opacity: 0;">
+              <input type="checkbox" id="rememberMe" name="rememberMe" [(ngModel)]="rememberMe" >
               <span class="checkbox-label">Remember me</span>
             </label>
-            <button type="button" class="forgot-password">Forgot password?</button>
+            <button type="button" class="forgot-password" (click)="switchToForgotPassword()">Forgot password?</button>
           </div>
 
           <!-- Error Message -->
@@ -235,7 +235,7 @@
           </button>
 
           <!-- Social Login Options -->
-          <div class="social-login">
+          <!-- <div class="social-login">
             <div class="divider">
               <span>or continue with</span>
             </div>
@@ -256,9 +256,53 @@
                 Apple
               </button>
             </div>
-          </div>
+          </div> -->
         </form>
       </div>
+
+      <div *ngIf="isForgotPasswordMode" class="forgot-password-section">
+        <h2 class="forgot-password-title">Reset Password</h2>
+        <p class="forgot-password-subtitle">Enter your email to receive a reset link</p>
+  
+        <div *ngIf="forgotPasswordSuccess" class="success-message">
+          <span>If your email is registered, you'll receive a password reset link shortly.</span>
+        </div>
+  
+        <div *ngIf="forgotPasswordError" class="error-message">
+          {{ forgotPasswordError }}
+        </div>
+  
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <div class="input-wrapper">
+            <input 
+              type="email" 
+              [(ngModel)]="forgotPasswordEmail" 
+              class="form-input" 
+              placeholder="your@email.com"
+            />
+          </div>
+        </div>
+  
+        <button 
+          type="button" 
+          class="submit-btn" 
+          (click)="onForgotPasswordSubmit()"
+          [disabled]="isLoading"
+        >
+          <div class="btn-content">
+            <span *ngIf="!isLoading">Send Reset Link</span>
+            <span *ngIf="isLoading" class="loading-spinner">
+              <span class="spinner"></span> Sending...
+            </span>
+          </div>
+        </button>
+  
+        <div class="back-to-login">
+          <a (click)="switchToLogin()">Back to Login</a>
+        </div>
+      </div>
+
 
       <!-- Footer -->
       <div class="modal-footer">

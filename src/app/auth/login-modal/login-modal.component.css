@@ -298,3 +298,55 @@
   cursor: pointer;
   margin-left: 5px;
 }
+
+/* Add to login-modal.component.css */
+.forgot-password-section {
+  padding: 20px;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.forgot-password-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #333;
+  text-align: center;
+}
+
+.forgot-password-subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.forgot-password-link {
+  text-align: center;
+  margin-top: 15px;
+  color: #689f38;
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.forgot-password-link:hover {
+  color: #558b2f;
+  text-decoration: underline;
+}
+
+.back-to-login {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.back-to-login a {
+  color: #689f38;
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.back-to-login a:hover {
+  color: #558b2f;
+  text-decoration: underline;
+}
