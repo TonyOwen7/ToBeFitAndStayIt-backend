@@ -1,16 +1,10 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable } from 'rxjs';
-
-export interface UserProfile {
-  id?: string;
-  username?: string;
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  avatar?: string;
-  // Add other profile fields as needed
-}
+import { UserProfile } from '../../models/user-profile.model'; // Adjust the import path as needed
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { HttpHeaders } from '@angular/common/http'
 
 export interface AuthData {
   token: string;
@@ -22,6 +16,8 @@ export interface AuthData {
   providedIn: 'root'
 })
 export class AuthStateService {
+  private baseUrl = environment.apiUrl;
+
   private readonly TOKEN_KEY = 'authToken';
   private readonly USER_KEY = 'userData';
   private readonly AUTH_DATA_KEY = 'authData'; // Combined storage key
@@ -36,7 +32,10 @@ export class AuthStateService {
   public userProfile$: Observable<UserProfile | null> = this.userProfileSubject.asObservable();
   public authInitialized$: Observable<boolean> = this.authInitializedSubject.asObservable();
   
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private http: HttpClient
+  ) {
     this.initializeAuthState();
   }
 
@@ -125,6 +124,7 @@ export class AuthStateService {
   login(token: string, userProfile: UserProfile): void {
     // Save to storage first
     this.saveAuthData(token, userProfile);
+
     
     // Update reactive state
     this.setAuthState(true, userProfile);
@@ -192,25 +192,23 @@ export class AuthStateService {
    * Get current authentication token
    */
   getAuthToken(): string | null {
-    if (!isPlatformBrowser(this.platformId)) {
-      return null;
-    }
-
-    try {
-      // Try new format first
-      const authDataStr = localStorage.getItem(this.AUTH_DATA_KEY);
-      if (authDataStr) {
-        const authData: AuthData = JSON.parse(authDataStr);
-        return authData.token;
-      }
-      
-      // Fallback to legacy format
-      return localStorage.getItem(this.TOKEN_KEY);
-    } catch (error) {
-      console.error('Error getting auth token:', error);
-      return null;
-    }
+  if (!isPlatformBrowser(this.platformId)) {
+    return null;
   }
+
+  try {
+    const authDataStr = localStorage.getItem(this.AUTH_DATA_KEY);
+    if (authDataStr) {
+      const authData: AuthData = JSON.parse(authDataStr);
+      return authData.token;
+    }
+    return localStorage.getItem(this.TOKEN_KEY);
+  } catch (error) {
+    console.error('Error getting auth token:', error);
+    return null;
+  }
+}
+
 
   /**
    * Get current user profile
@@ -229,16 +227,34 @@ export class AuthStateService {
   /**
    * Update user profile (and save to localStorage)
    */
-  updateUserProfile(userProfile: UserProfile): void {
-    const currentToken = this.getAuthToken();
-    if (currentToken) {
-      this.saveAuthData(currentToken, userProfile);
+  updateUserProfile(userProfileUpdates: Partial<UserProfile>): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+  
+    const accessToken = this.getAuthToken(); // ✅ Use your helper method
+  
+    if (!accessToken) {
+      console.warn('No access token found. Skipping profile update.');
+      return;
     }
-    
-    // Update reactive state
-    this.userProfileSubject.next(userProfile);
-    console.log('User profile updated:', userProfile);
+  
+    const url = `${this.baseUrl}/user/profile/`;
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${accessToken}`
+    });
+  
+    this.http.patch<UserProfile>(url, userProfileUpdates, { headers }).subscribe({
+      next: (updatedProfile) => {
+        this.saveAuthData(accessToken, updatedProfile);
+        this.userProfileSubject.next(updatedProfile);
+        console.log('✅ User profile successfully updated:', updatedProfile);
+      },
+      error: (err) => {
+        console.error('❌ Failed to update user profile:', err);
+      }
+    });
   }
+  
+  
 
   /**
    * Private method to update both auth state and user profile

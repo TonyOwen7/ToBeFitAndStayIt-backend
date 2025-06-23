@@ -1,13 +1,14 @@
 // header.component.ts
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, HostListener, OnInit, OnDestroy } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LoginModalComponent } from '../../../auth/login-modal/login-modal.component';
-import { AuthStateService, UserProfile } from '../../../services/auth-state/auth-state.service';
+import { UserProfile } from '../../../models/user-profile.model';
+import { AuthStateService } from '../../../services/auth-state/auth-state.service';
 import { Subscription } from 'rxjs';
-import { get } from 'node:http';
 import { AuthService } from '../../../services/auth/auth.service';
+import { Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-header',
@@ -41,6 +42,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private router: Router, 
     private authState: AuthStateService,
     private authService: AuthService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
@@ -104,26 +106,32 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isRegisterMode = false;
     // The AuthStateService is already updated by the login modal
     // Emit to parent component if needed for additional actions
-    this.loginSuccess.emit();
   }
 
-  // Logout method
+
   logout() {
     console.log('Logout clicked');
-    this.authState.logout(); // This will automatically update isLoggedIn via subscription
-    const refreshToken = this.authService.getRefreshToken();
-
-    this.authService.logout(refreshToken).subscribe({
+  
+    let refreshToken: string | null = null;
+    if (isPlatformBrowser(this.platformId)) {
+      refreshToken = localStorage.getItem('accessToken');
+    }
+  
+    this.authService.logout().subscribe({
       next: () => {
-        localStorage.clear(); // clear all auth stuff
+        this.authState.logout();
         this.router.navigate(['/']);
       },
       error: () => {
-        localStorage.clear(); // fallback
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.clear();
+        }
         this.router.navigate(['/']);
       }
-    });    
+    });
   }
+  
+  
 
   // Navigation methods
   onRegisterClick() {

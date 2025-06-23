@@ -9,7 +9,6 @@ import { HomeComponent } from './core/components/home/home.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { LoginModalComponent } from './auth/login-modal/login-modal.component';
 import { AboutComponent } from './features/about/about.component';
-import { SettingsComponent } from './features/settings/settings.component';
 import { ForgotPasswordComponent } from './auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './auth/reset-password/reset-password.component';
 
@@ -24,6 +23,5 @@ export const routes: Routes = [
   { path: 'reset-password/:uid/:token', component: ResetPasswordComponent },
   { path: 'register', component: RegisterComponent }, 
   { path: 'about', component: AboutComponent },
-  { path: 'settings', component: SettingsComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' } // Redirect to home on empty path,
 ];

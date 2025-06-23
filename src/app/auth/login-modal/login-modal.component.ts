@@ -54,10 +54,10 @@ export class LoginModalComponent implements OnInit{
   private passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
 
   ngOnInit(): void {
-    // if (isPlatformBrowser(this.platformId)) {
-    //   const remembered = localStorage.getItem('rememberedEmail');
-    //   if (remembered) this.email = remembered;
-    // }
+    if (isPlatformBrowser(this.platformId)) {
+      const remembered = localStorage.getItem('rememberedEmail');
+      if (remembered) this.email = remembered;
+    }
   }
 
   switchToForgotPassword() {
@@ -241,8 +241,15 @@ export class LoginModalComponent implements OnInit{
             email: res.user?.email || res.email || this.email,
             firstName: res.user?.first_name || res.first_name || '',
             lastName: res.user?.last_name || res.last_name || '',
-            avatar: res.user?.avatar || res.avatar
+          
+            // Water needs–related fields
+            gender: res.user?.gender || res.gender || 'male', // default fallback
+            weight: res.user?.weight || res.weight || 70,
+            age: res.user?.age || res.age || null,
+            climate: res.user?.climate || res.climate || 'normal',
+            activityLevel: res.user?.activityLevel || res.activityLevel || 'moderate'
           };
+          
           
           // Update AuthStateService with token and user profile
           this.authState.login(res.access, userProfile);
@@ -316,9 +323,6 @@ export class LoginModalComponent implements OnInit{
   switchToRegister() {
     this.isOpen = false;
     this.router.navigate(['/register']);
-
-    // this.isRegisterMode = true; 
-    // this.resetForm();
   }
 
   switchToLogin() {

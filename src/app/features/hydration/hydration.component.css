@@ -20,6 +20,8 @@ body {
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .header {
@@ -46,6 +48,10 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
 }
 
 .panel {
@@ -80,10 +86,12 @@ body {
     grid-column: 1 / -1;
 }
 
-/* Daily Intake Panel */
-.intake-panel {
-    grid-column: 1 / -1;
+.form-group.full-width {
+  margin-top: 10px;
 }
+
+/* Daily Intake Panel */
+
 
 .water-display {
     text-align: center;
@@ -508,6 +516,9 @@ body {
 /* Recommendations Panel Styling */
 .recommendations-list {
     margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
   }
   
   .recommendation-item {
@@ -964,3 +975,237 @@ body {
     from { top: -30px; }
     to { top: -35px; }
   }
+
+  /* hydration.component.css */
+/* Add to existing styles */
+.sign-in-prompt {
+  text-align: center;
+  padding: 20px;
+  background: #e3f2fd;
+  border-radius: 10px;
+  border: 1px solid #bbdefb;
+}
+
+.sign-in-prompt h3 {
+  color: #1565c0;
+  margin-bottom: 10px;
+}
+
+.sign-in-prompt p {
+  margin-bottom: 15px;
+  color: #546e7a;
+}
+
+.auth-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(66, 165, 245, 0.4);
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.custom-item-section {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.sub-section-title {
+  margin-bottom: 15px;
+  color: #1976d2;
+  font-size: 1.1rem;
+}
+
+input[list] {
+  background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2342a5f5' viewBox='0 0 16 16'%3E%3Cpath d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zM7 11.5a.5.5 0 0 1-1 0V6.707L5.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L7 6.707V11.5z'/%3E%3C/svg%3E") 
+    no-repeat right 10px center;
+  padding-right: 35px;
+}
+
+/* Overhydration Styles */
+.overhydration-alert {
+  background: #fff3e0;
+  border: 2px solid #ff9800;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+}
+
+.alert-icon {
+  font-size: 24px;
+  margin-right: 10px;
+  color: #f57c00;
+}
+
+.alert-content {
+  font-weight: 600;
+  color: #e65100;
+}
+
+.overhydration-consequences {
+  background: #fbe9e7;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 20px;
+  border-left: 4px solid #d32f2f;
+}
+
+.consequences-title {
+  color: #c62828;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.overhydration-consequences ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.overhydration-consequences li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+}
+
+.warning-icon {
+  font-size: 18px;
+  margin-right: 10px;
+  color: #d32f2f;
+  min-width: 20px;
+}
+
+.warning-text {
+  flex: 1;
+}
+
+.hydration-advice {
+  background: #e8f5e9;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 15px;
+  font-size: 0.95rem;
+  border-left: 3px solid #4caf50;
+}
+
+/* Overhydration indicators */
+.overhydrated {
+  position: relative;
+  overflow: hidden;
+}
+
+.overhydrated::after {
+  content: "⚠️";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 24px;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+.overhydrated-text {
+  color: #9c27b0;
+  position: relative;
+  display: inline-block;
+}
+
+.overhydrated-text::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #9c27b0;
+  animation: underline-pulse 1.5s infinite;
+}
+
+@keyframes underline-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Water bottle for overhydration */
+.water-bottle.overhydrated-bottle {
+  position: relative;
+}
+
+.water-bottle.overhydrated-bottle::after {
+  content: "⚠️ OVERHYDRATION ⚠️";
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: #d32f2f;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: bold;
+  animation: bounce 0.8s infinite alternate;
+}
+
+
+@keyframes bounce {
+  from { top: -30px; }
+  to { top: -35px; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.main-content {
+  flex-wrap: wrap;
+  flex-grow: 1;
+}
+
+
+.content-container {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1f 1fr;
+  flex-wrap: wrap;
+  gap: 20px;
+}

@@ -1,3 +1,4 @@
+<!-- hydration.component.html -->
 <div class="app-container">
   <app-header 
     title="ToBeFitAndStayIt" 
@@ -8,226 +9,7 @@
   </app-header>
 
   <main class="main-content">
-    <!-- Daily Water Intake Panel with Tabs -->
-    <div class="panel intake-panel">
-      <h2 class="panel-title">Daily Water Intake</h2>
-      
-      <!-- Error Message -->
-      <div *ngIf="error" class="error-message">
-        {{ error }}
-      </div>
-      
-      <!-- Current Status Display -->
-      <div class="water-display">
-        <div class="water-counter">{{ totalWater.toFixed(0) }}</div>
-        <div class="water-label">mL consumed today</div>
-        <div *ngIf="totalCalories > 0" class="calories-display">
-          {{ totalCalories.toFixed(0) }} calories
-        </div>
-      </div>
-
-      <!-- Tab Navigation -->
-      <div class="tab-navigation">
-        <button 
-          class="tab-btn" 
-          [class.active]="activeTab === 'water'"
-          (click)="setActiveTab('water')">
-          💧 Pure Water
-        </button>
-        <button 
-          class="tab-btn" 
-          [class.active]="activeTab === 'drinks'"
-          (click)="setActiveTab('drinks')">
-          🥤 Beverages
-        </button>
-        <button 
-          class="tab-btn" 
-          [class.active]="activeTab === 'foods'"
-          (click)="setActiveTab('foods')">
-          🍎 Water-Rich Foods
-        </button>
-      </div>
-
-      <!-- Water Tab Content -->
-      <div *ngIf="activeTab === 'water'" class="tab-content">
-        <!-- Quick Add Section -->
-        <div class="quick-add-section">
-          <h3 class="section-title">Quick Add</h3>
-          <div class="quick-add-buttons">
-            <button class="quick-add-btn" (click)="quickAdd(250)">Glass (250ml)</button>
-            <button class="quick-add-btn" (click)="quickAdd(500)">Bottle (500ml)</button>
-            <button class="quick-add-btn" (click)="quickAdd(330)">Can (330ml)</button>
-            <button class="quick-add-btn" (click)="quickAdd(200)">Cup (200ml)</button>
-            <button class="quick-add-btn" (click)="quickAdd(150)">Tea/Coffee (150ml)</button>
-          </div>
-        </div>
-
-        <!-- Custom Water Entry -->
-        <div class="custom-entry-section">
-          <h3 class="section-title">Custom Entry</h3>
-          <div class="water-input-section">
-            <div class="form-group">
-              <label class="form-label">Drink Name</label>
-              <input 
-                type="text" 
-                [(ngModel)]="drinkName" 
-                class="form-input" 
-                placeholder="e.g., Water, Tea, Juice">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Quantity</label>
-              <input 
-                type="number" 
-                [(ngModel)]="quantity" 
-                class="form-input" 
-                placeholder="1" 
-                min="1" 
-                step="1">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Volume per unit (mL)</label>
-              <input 
-                type="number" 
-                [(ngModel)]="volumePerUnit" 
-                class="form-input" 
-                placeholder="250" 
-                min="1">
-            </div>
-            <button class="add-btn" (click)="addWater()">Add Water</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Drinks Tab Content -->
-      <div *ngIf="activeTab === 'drinks'" class="tab-content">
-        <div class="loading-spinner" *ngIf="isLoading">Loading drinks...</div>
-        
-        <div class="drink-selection-section" *ngIf="!isLoading">
-          <h3 class="section-title">Select Beverage</h3>
-          <div class="selection-form">
-            <div class="form-group">
-              <label class="form-label">Choose Drink</label>
-              <select 
-                class="form-select" 
-                (change)="onDrinkChange($event)"
-                [value]="selectedDrink?.id || ''">
-                <option value="">-- Select a drink --</option>
-                <option *ngFor="let drink of availableDrinks" [value]="drink.id">
-                  {{ drink.name }} ({{ drink.volume }}mL, {{ drink.calories_per_volume }} cal)
-                </option>
-              </select>
-            </div>
-            
-            <div class="form-group" *ngIf="selectedDrink">
-              <label class="form-label">Quantity</label>
-              <input 
-                type="number" 
-                [(ngModel)]="selectedDrinkQuantity" 
-                class="form-input" 
-                placeholder="1" 
-                min="1" 
-                step="1">
-            </div>
-            
-            <div class="drink-preview" *ngIf="selectedDrink && selectedDrinkQuantity">
-              <div class="preview-info">
-                <strong>{{ selectedDrinkQuantity }} × {{ selectedDrink.name }}</strong>
-                <div class="preview-details">
-                  Volume: {{ (selectedDrinkQuantity * selectedDrink.volume).toFixed(0) }}mL
-                  | Calories: {{ (selectedDrinkQuantity * selectedDrink.calories_per_volume).toFixed(0) }}
-                </div>
-              </div>
-            </div>
-            
-            <button 
-              class="add-btn" 
-              (click)="addSelectedDrink()"
-              [disabled]="!selectedDrink || !selectedDrinkQuantity">
-              Add Beverage
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Foods Tab Content -->
-      <div *ngIf="activeTab === 'foods'" class="tab-content">
-        <div class="loading-spinner" *ngIf="isLoading">Loading foods...</div>
-        
-        <div class="food-selection-section" *ngIf="!isLoading">
-          <h3 class="section-title">Select Water-Rich Food</h3>
-          <div class="selection-form">
-            <div class="form-group">
-              <label class="form-label">Choose Food</label>
-              <select 
-                class="form-select" 
-                (change)="onFoodChange($event)"
-                [value]="selectedFood?.id || ''">
-                <option value="">-- Select a food --</option>
-                <option *ngFor="let food of availableFoods" [value]="food.id">
-                  {{ food.name }} ({{ food.water_percentage }}% water, {{ food.calories_per_mass }} cal/{{ food.mass }}g)
-                </option>
-              </select>
-            </div>
-            
-            <div class="form-group" *ngIf="selectedFood">
-              <label class="form-label">Quantity (servings)</label>
-              <input 
-                type="number" 
-                [(ngModel)]="selectedFoodQuantity" 
-                class="form-input" 
-                placeholder="1" 
-                min="1" 
-                step="0.5">
-            </div>
-            
-            <div class="food-preview" *ngIf="selectedFood && selectedFoodQuantity">
-              <div class="preview-info">
-                <strong>{{ selectedFoodQuantity }} × {{ selectedFood.name }}</strong>
-                <div class="preview-details">
-                  Water Content: {{ ((selectedFoodQuantity * selectedFood.mass * selectedFood.water_percentage) / 100).toFixed(0) }}mL
-                  | Calories: {{ (selectedFoodQuantity * selectedFood.calories_per_mass).toFixed(0) }}
-                </div>
-              </div>
-            </div>
-            
-            <button 
-              class="add-btn" 
-              (click)="addSelectedFood()"
-              [disabled]="!selectedFood || !selectedFoodQuantity">
-              Add Food
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Consumed Items List -->
-      <div class="consumed-items-section">
-        <h3 class="section-title">Today's Intake</h3>
-        <div class="water-list">
-          <div *ngIf="waterItems.length === 0" class="empty-state">
-            No items added yet. Start tracking your hydration!
-          </div>
-          <div *ngFor="let item of waterItems" class="water-item">
-            <div class="item-icon" [style.color]="getItemTypeColor(item.type)">
-              {{ getItemTypeIcon(item.type) }}
-            </div>
-            <div class="water-info">
-              <div class="water-name">{{ item.name }}</div>
-              <div class="water-details">
-                {{ item.quantity }} × {{ item.volumePerUnit.toFixed(0) }} mL
-                <span *ngIf="item.calories" class="calories-info">
-                  | {{ item.calories.toFixed(0) }} cal
-                </span>
-              </div>
-            </div>
-            <div class="water-amount">{{ item.totalVolume.toFixed(0) }} mL</div>
-            <button class="remove-btn" (click)="removeItem(item.id)">×</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Hydration Goal Panel -->
+    <!-- Water Needs Panel (always visible) -->
     <div class="panel">
       <h2 class="panel-title">Water Needs</h2>
       
@@ -255,7 +37,7 @@
           <input 
             type="number" 
             [(ngModel)]="bodyWeight" 
-            (ngModelChange)="calculateGoal()"
+            (blur)="onWeightBlur()"
             class="form-input" 
             min="30"
             max="200"
@@ -268,7 +50,7 @@
           <input 
             type="number" 
             [(ngModel)]="age" 
-            (ngModelChange)="calculateGoal()"
+            (blur)="onAgeBlur()"
             class="form-input" 
             min="5"
             max="120"
@@ -280,7 +62,7 @@
           <label class="form-label">Climate</label>
           <select 
             [(ngModel)]="climate" 
-            (ngModelChange)="calculateGoal()"
+            (ngModelChange)="onClimateChange()"
             class="form-select">
             <option value="normal">Normal</option>
             <option value="hot">Hot/Humid</option>
@@ -308,57 +90,33 @@
               [class.active]="activityLevel === 'intense'"
               (click)="setActivity('intense')">Intense</button>
           </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Current Status Panel -->
-    <div class="panel">
-      <h2 class="panel-title">Hydration Status</h2>
-      
-     <!-- Also update the water bottle element -->
-      <div class="water-bottle" [class.overhydrated-bottle]="hydrationStatus.isOver">
-        <div class="water-level" [style.height.%]="progressPercentage > 100 ? 100 : progressPercentage"></div>
-      </div>
-      
-      <div class="hydration-level">
-        <div 
-        class="hydration-circle" 
-        [style.background]="hydrationStatus.color"
-        [class.overhydrated]="hydrationStatus.isOver">
-        {{ roundedPercentage }}%
-      </div>
-      <div class="hydration-status">
-        <h3 [class.overhydrated-text]="hydrationStatus.isOver">{{ hydrationStatus.text }}</h3>
-        
-        <!-- Show overhydration warning -->
-        <div *ngIf="hydrationStatus.isOver" class="overhydration-alert">
-          <div class="alert-icon">⚠️</div>
-          <div class="alert-content">
-            You've consumed {{ overhydrationAmount.toFixed(0) }} mL beyond your goal!
+          <div class="form-group full-width" style="text-align: center; margin-top: 30px;">
+            <button class="add-btn" (click)="syncProfileWithBackend()">Save</button>
+          
+            <div *ngIf="saveSuccess" style="background: #e8f5e9; border: 1px solid #66bb6a; padding: 10px; margin-top: 15px; border-radius: 8px; color: #2e7d32;">
+              ✅ Your changes have been saved successfully!
+            </div>
+            
           </div>
+          
+          
         </div>
-        
-        <!-- Show remaining water for normal hydration -->
-        <p *ngIf="!hydrationStatus.isOver">
-          {{ remainingWater.toFixed(0) }} mL remaining to reach your goal
-        </p>
-      </div>
-      </div>
-      
-      <div class="daily-goal-display">
-        Daily Goal: {{ dailyWaterGoal.toFixed(0) }} mL
       </div>
     </div>
 
-  
-
-    <!-- Recommendations Panel -->
+    <!-- Recommendations Panel (always visible) -->
     <div class="panel">
       <h2 class="panel-title">Recommendations</h2>
       
       <div class="recommendations-list">
-        <div *ngIf="recommendations.length === 0" class="empty-state">
+        <div *ngIf="!isLoggedIn" class="sign-in-prompt">
+          <h3>Personalized Hydration Guidance</h3>
+          <p>Sign in to get customized recommendations based on your profile!</p>
+          <button class="auth-btn" (click)="openLoginModal()">Sign In</button>
+        </div>
+        
+        <div *ngIf="isLoggedIn && recommendations.length === 0" class="empty-state">
           Enter your details to get personalized recommendations
         </div>
         
@@ -372,62 +130,435 @@
       </div>
     </div>
 
-       <!-- Overhydration Consequences Section -->
-  <div *ngIf="hydrationStatus.isOver" class="overhydration-consequences">
-    <h3 class="consequences-title">Potential Consequences:</h3>
-    <ul>
-      <li *ngFor="let warning of overhydrationWarnings">
-        <div class="warning-icon">❗</div>
-        <div class="warning-text">{{ warning }}</div>
-      </li>
-      <li>
-        <div class="warning-icon">❗</div>
-        <div class="warning-text">Reduced sodium levels affecting nerve function</div>
-      </li>
-      <li>
-        <div class="warning-icon">❗</div>
-        <div class="warning-text">Headaches and nausea from electrolyte imbalance</div>
-      </li>
-    </ul>
-    
-    <div class="hydration-advice">
-      <strong>Advice:</strong> Reduce water intake and monitor symptoms. 
-      If experiencing severe headaches or confusion, seek medical attention.
-    </div>
-  </div>
+    <!-- Rest of content shown after water needs are set or user is logged in -->
+    <div *ngIf="showAllContent" class="content-container full-width" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <!-- Daily Water Intake Panel with Tabs -->
+        <div class="panel intake-panel" style="grid-column: 1 / span 2;">          <h2 class="panel-title">Daily Water Intake</h2>
+          
+          <!-- Error Message -->
+          <div *ngIf="error" class="error-message">
+            {{ error }}
+          </div>
+          
+          <!-- Current Status Display -->
+          <div class="water-display">
+            <div class="water-counter">{{ totalWater.toFixed(0) }}</div>
+            <div class="water-label">mL consumed today</div>
+            <div *ngIf="totalCalories > 0" class="calories-display">
+              {{ totalCalories.toFixed(0) }} calories
+            </div>
+          </div>
 
-    <div class="panel health-insights-panel full-width">
-      <h2 class="panel-title">Health Insights</h2>
-      
-      <div class="insights-intro">
-        <p>Your current hydration level affects multiple aspects of your health:</p>
-      </div>
-      
-      <div class="health-indicators">
-        <div *ngFor="let insight of getHealthInsights()" class="indicator">
-          <div class="indicator-icon">{{ insight.icon }}</div>
-          <div class="indicator-details">
-            <h3 class="indicator-name">{{ insight.name }}</h3>
-            <div class="indicator-status">{{ insight.status }}</div>
-            <p class="indicator-description">{{ insight.description }}</p>
+          <!-- Tab Navigation -->
+          <div class="tab-navigation">
+            <button 
+              class="tab-btn" 
+              [class.active]="activeTab === 'water'"
+              (click)="setActiveTab('water')">
+              💧 Pure Water
+            </button>
+            <button 
+              class="tab-btn" 
+              [class.active]="activeTab === 'drinks'"
+              (click)="setActiveTab('drinks')">
+              🥤 Beverages
+            </button>
+            <button 
+              class="tab-btn" 
+              [class.active]="activeTab === 'foods'"
+              (click)="setActiveTab('foods')">
+              🍎 Water-Rich Foods
+            </button>
+          </div>
+
+          <!-- Water Tab Content -->
+          <div *ngIf="activeTab === 'water'" class="tab-content">
+            <!-- Quick Add Section -->
+            <div class="quick-add-section">
+              <h3 class="section-title">Quick Add</h3>
+              <div class="quick-add-buttons">
+                <button class="quick-add-btn" (click)="quickAdd(250)">Glass (250ml)</button>
+                <button class="quick-add-btn" (click)="quickAdd(500)">Bottle (500ml)</button>
+                <button class="quick-add-btn" (click)="quickAdd(330)">Can (330ml)</button>
+                <button class="quick-add-btn" (click)="quickAdd(200)">Cup (200ml)</button>
+                <button class="quick-add-btn" (click)="quickAdd(150)">Tea/Coffee (150ml)</button>
+              </div>
+            </div>
+
+            <!-- Custom Water Entry -->
+            <div class="custom-entry-section">
+              <h3 class="section-title">Custom Entry</h3>
+              <div class="water-input-section">
+                <div class="form-group">
+                  <label class="form-label">Drink Name</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="drinkName" 
+                    class="form-input" 
+                    placeholder="e.g., Water, Tea, Juice">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Quantity</label>
+                  <input 
+                    type="number" 
+                    [(ngModel)]="quantity" 
+                    class="form-input" 
+                    placeholder="1" 
+                    min="1" 
+                    step="1">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Volume per unit (mL)</label>
+                  <input 
+                    type="number" 
+                    [(ngModel)]="volumePerUnit" 
+                    class="form-input" 
+                    placeholder="250" 
+                    min="1">
+                </div>
+                <button class="add-btn" (click)="addWater()">Add Water</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Drinks Tab Content -->
+          <div *ngIf="activeTab === 'drinks'" class="tab-content">
+            <div class="loading-spinner" *ngIf="isLoading">Loading drinks...</div>
+            
+            <div class="drink-selection-section" *ngIf="!isLoading">
+              <h3 class="section-title">Select Beverage</h3>
+              <div class="selection-form">
+                <div class="form-group">
+                  <label class="form-label">Choose Drink</label>
+                  <input 
+                    type="text"
+                    list="drinksList"
+                    [(ngModel)]="selectedDrinkName"
+                    (input)="onDrinkChange()"
+                    class="form-input" 
+                    placeholder="Type or select a drink">
+                  <datalist id="drinksList">
+                    <option *ngFor="let drink of availableDrinks" [value]="drink.name">
+                  </datalist>
+                </div>
+                
+                <div class="form-group" *ngIf="selectedDrink">
+                  <label class="form-label">Quantity</label>
+                  <input 
+                    type="number" 
+                    [(ngModel)]="selectedDrinkQuantity" 
+                    class="form-input" 
+                    placeholder="1" 
+                    min="1" 
+                    step="1">
+                </div>
+
+                <div class="form-group" *ngIf="selectedDrink">
+                  <label class="form-label">Volume per Unit (mL)</label>
+                  <input 
+                    type="number" 
+                    [(ngModel)]="selectedDrinkVolume" 
+                    class="form-input" 
+                    [placeholder]="selectedDrink.volume" 
+                    min="1">
+                </div>
+                
+                <div class="drink-preview" *ngIf="selectedDrink && selectedDrinkQuantity">
+                  <div class="preview-info">
+                    <strong>{{ selectedDrinkQuantity }} × {{ selectedDrink.name }}</strong>
+                    <div class="preview-details">
+                      Volume: {{ (selectedDrinkQuantity * selectedDrink.volume).toFixed(0) }}mL
+                      | Calories: {{ (selectedDrinkQuantity * selectedDrink.calories_per_volume).toFixed(0) }}
+                    </div>
+                  </div>
+                </div>
+                
+                <button 
+                  class="add-btn" 
+                  (click)="addSelectedDrink()"
+                  [disabled]="!selectedDrink || !selectedDrinkQuantity">
+                  Add Beverage
+                </button>
+              </div>
+              
+              <!-- Custom Drink Creation -->
+              <div class="custom-item-section">
+                <h4 class="sub-section-title">Add New Beverage</h4>
+                <div class="form-group">
+                  <label class="form-label">Drink Name</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="customDrinkName" 
+                    class="form-input" 
+                    placeholder="e.g., Homemade Lemonade">
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Volume per unit (mL)</label>
+                    <input 
+                      type="number" 
+                      [(ngModel)]="customDrinkVolume" 
+                      class="form-input" 
+                      placeholder="250" 
+                      min="1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Calories per unit</label>
+                    <input 
+                      type="number" 
+                      [(ngModel)]="customDrinkCalories" 
+                      class="form-input" 
+                      placeholder="0" 
+                      min="0">
+                  </div>
+                </div>
+                <button 
+                  class="add-btn" 
+                  (click)="addCustomDrink()">
+                  Add Custom Beverage
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Foods Tab Content -->
+          <div *ngIf="activeTab === 'foods'" class="tab-content">
+            <div class="loading-spinner" *ngIf="isLoading">Loading foods...</div>
+            
+            <div class="food-selection-section" *ngIf="!isLoading">
+              <h3 class="section-title">Select Water-Rich Food</h3>
+              <div class="selection-form">
+                <div class="form-group">
+                  <label class="form-label">Choose Food</label>
+                  <input 
+                    type="text"
+                    list="foodsList"
+                    [(ngModel)]="selectedFoodName"
+                    (input)="onFoodChange()"
+                    class="form-input" 
+                    placeholder="Type or select a food">
+                  <datalist id="foodsList">
+                    <option *ngFor="let food of availableFoods" [value]="food.name">
+                  </datalist>
+                </div>
+                
+                <div class="form-group" *ngIf="selectedFood">
+                  <label class="form-label">Quantity (servings)</label>
+                  <input 
+                    type="number" 
+                    [(ngModel)]="selectedFoodQuantity" 
+                    class="form-input" 
+                    placeholder="1" 
+                    min="1" 
+                    step="0.5">
+                </div>
+
+                <div class="form-group" *ngIf="selectedFood">
+                  <label class="form-label">Mass per Serving (g)</label>
+                  <input 
+                    type="number" 
+                    [(ngModel)]="selectedFoodMass" 
+                    class="form-input" 
+                    [placeholder]="selectedFood.mass" 
+                    min="1">
+                </div>
+                
+                <div class="food-preview" *ngIf="selectedFood && selectedFoodQuantity">
+                  <div class="preview-info">
+                    <strong>{{ selectedFoodQuantity }} × {{ selectedFood.name }}</strong>
+                    <div class="preview-details">
+                      Water Content: {{ ((selectedFoodQuantity * selectedFood.mass * selectedFood.water_percentage) / 100).toFixed(0) }}mL
+                      | Calories: {{ (selectedFoodQuantity * selectedFood.calories_per_mass).toFixed(0) }}
+                    </div>
+                  </div>
+                </div>
+                
+                <button 
+                  class="add-btn" 
+                  (click)="addSelectedFood()"
+                  [disabled]="!selectedFood || !selectedFoodQuantity">
+                  Add Food
+                </button>
+              </div>
+              
+              <!-- Custom Food Creation -->
+              <div class="custom-item-section">
+                <h4 class="sub-section-title">Add New Food</h4>
+                <div class="form-group">
+                  <label class="form-label">Food Name</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="customFoodName" 
+                    class="form-input" 
+                    placeholder="e.g., Watermelon">
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Mass per serving (g)</label>
+                    <input 
+                      type="number" 
+                      [(ngModel)]="customFoodMass" 
+                      class="form-input" 
+                      placeholder="100" 
+                      min="1">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Water Percentage</label>
+                    <input 
+                      type="number" 
+                      [(ngModel)]="customFoodWaterPercentage" 
+                      class="form-input" 
+                      placeholder="92" 
+                      min="0" 
+                      max="100">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Calories per mass</label>
+                  <input 
+                    type="number" 
+                    [(ngModel)]="customFoodCalories" 
+                    class="form-input" 
+                    placeholder="30" 
+                    min="0">
+                </div>
+                <button 
+                  class="add-btn" 
+                  (click)="addCustomFood()">
+                  Add Custom Food
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Consumed Items List -->
+          <div class="consumed-items-section">
+            <h3 class="section-title">Today's Intake</h3>
+            <div class="water-list">
+              <div *ngIf="waterItems.length === 0" class="empty-state">
+                No items added yet. Start tracking your hydration!
+              </div>
+              <div *ngFor="let item of waterItems" class="water-item">
+                <div class="item-icon" [style.color]="getItemTypeColor(item.type)">
+                  {{ getItemTypeIcon(item.type) }}
+                </div>
+                <div class="water-info">
+                  <div class="water-name">{{ item.name }}</div>
+                  <div class="water-details">
+                    {{ item.quantity }} × {{ item.volumePerUnit.toFixed(0) }} mL
+                    <span *ngIf="item.calories" class="calories-info">
+                      | {{ item.calories.toFixed(0) }} cal
+                    </span>
+                  </div>
+                </div>
+                <div class="water-amount">{{ item.totalVolume.toFixed(0) }} mL</div>
+                <button class="remove-btn" (click)="removeItem(item.id)">×</button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div class="hydration-tips">
-        <h3>Hydration Tips:</h3>
-        <ul>
-          <li>Drink water consistently throughout the day</li>
-          <li>Monitor urine color - aim for pale yellow</li>
-          <li>Increase intake during exercise or hot weather</li>
-          <li>Consume water-rich foods (cucumber, watermelon)</li>
-          <li>Avoid drinking more than 1L per hour to prevent overhydration</li>
-        </ul>
+
+        <!-- Current Status Panel -->
+        <div class="panel">
+          <h2 class="panel-title">Hydration Status</h2>
+          
+          <div class="water-bottle" [class.overhydrated-bottle]="hydrationStatus.isOver">
+            <div class="water-level" [style.height.%]="progressPercentage > 100 ? 100 : progressPercentage"></div>
+          </div>
+          
+          <div class="hydration-level">
+            <div 
+              class="hydration-circle" 
+              [style.background]="hydrationStatus.color"
+              [class.overhydrated]="hydrationStatus.isOver">
+              {{ roundedPercentage }}%
+            </div>
+            <div class="hydration-status">
+              <h3 [class.overhydrated-text]="hydrationStatus.isOver">{{ hydrationStatus.text }}</h3>
+              
+              <!-- Show overhydration warning -->
+              <div *ngIf="hydrationStatus.isOver" class="overhydration-alert">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                  You've consumed {{ overhydrationAmount.toFixed(0) }} mL beyond your goal!
+                </div>
+              </div>
+              
+              <!-- Show remaining water for normal hydration -->
+              <p *ngIf="!hydrationStatus.isOver">
+                {{ remainingWater.toFixed(0) }} mL remaining to reach your goal
+              </p>
+            </div>
+          </div>
+          
+          <div class="daily-goal-display">
+            Daily Goal: {{ dailyWaterGoal.toFixed(0) }} mL
+          </div>
+        </div>
+
+        <!-- Overhydration Consequences Section -->
+        <div *ngIf="hydrationStatus.isOver" class="overhydration-consequences">          
+          <h3 class="consequences-title">Potential Consequences:</h3>
+          <ul>
+            <li *ngFor="let warning of overhydrationWarnings">
+              <div class="warning-icon">❗</div>
+              <div class="warning-text">{{ warning }}</div>
+            </li>
+            <li>
+              <div class="warning-icon">❗</div>
+              <div class="warning-text">Reduced sodium levels affecting nerve function</div>
+            </li>
+            <li>
+              <div class="warning-icon">❗</div>
+              <div class="warning-text">Headaches and nausea from electrolyte imbalance</div>
+            </li>
+          </ul>
+          
+          <div class="hydration-advice">
+            <strong>Advice:</strong> Reduce water intake and monitor symptoms. 
+            If experiencing severe headaches or confusion, seek medical attention.
+          </div>
+        </div>
+
+        <!-- Health Insights Panel -->
+        <div class="panel health-insights-panel" style="grid-column: 1 / span 2;">
+          <h2 class="panel-title">Health Insights</h2>
+          
+          <div class="insights-intro">
+            <p>Your current hydration level affects multiple aspects of your health:</p>
+          </div>
+          
+          <div class="health-indicators">
+            <div *ngFor="let insight of getHealthInsights()" class="indicator">
+              <div class="indicator-icon">{{ insight.icon }}</div>
+              <div class="indicator-details">
+                <h3 class="indicator-name">{{ insight.name }}</h3>
+                <div class="indicator-status">{{ insight.status }}</div>
+                <p class="indicator-description">{{ insight.description }}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="hydration-tips">
+            <h3>Hydration Tips:</h3>
+            <ul>
+              <li>Drink water consistently throughout the day</li>
+              <li>Monitor urine color - aim for pale yellow</li>
+              <li>Increase intake during exercise or hot weather</li>
+              <li>Consume water-rich foods (cucumber, watermelon)</li>
+              <li>Avoid drinking more than 1L per hour to prevent overhydration</li>
+              <li *ngIf="hydrationStatus.isOver">Consume electrolyte-rich foods/drinks</li>
+              <li *ngIf="hydrationStatus.isOver">Monitor for symptoms of hyponatremia</li>
+            </ul>
+          </div>
       </div>
     </div>
-    
   </main>
-
+  <app-login-modal 
+  [isOpen]="showLoginModal" 
+  (isclosed)="onLoginModalClose()"
+  >
+  </app-login-modal>
   <app-footer
     [background]="'linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)'"
     [radiant]="'radial-gradient(circle, rgba(66, 165, 245, 0.4) 0%, transparent 70%)'">

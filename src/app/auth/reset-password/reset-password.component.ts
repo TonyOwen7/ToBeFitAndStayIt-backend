@@ -6,11 +6,12 @@ import { FormsModule } from '@angular/forms';
 import { HeaderComponent } from '../../core/components/header/header.component';
 import { FooterComponent } from '../../core/components/footer/footer.component';
 import { AuthStateService } from '../../services/auth-state/auth-state.service';
+import { LoginModalComponent } from '../login-modal/login-modal.component';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, FooterComponent, LoginModalComponent],
   templateUrl: './reset-password.component.html',
   styleUrls: ['./reset-password.component.css']
 })
@@ -24,6 +25,8 @@ export class ResetPasswordComponent {
   isLoading = false;
   successMessage = '';
   errorMessage = '';
+  showLoginModal = false;
+  isOpen = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -43,10 +46,6 @@ export class ResetPasswordComponent {
 
   toggleConfirmPasswordVisibility(): void {
     this.confirmPasswordVisible = !this.confirmPasswordVisible;
-  }
-
-  goToLogin(): void {
-    this.router.navigate(['/login']);
   }
 
   onSubmit(): void {
@@ -75,8 +74,6 @@ export class ResetPasswordComponent {
         const userProfile = {
           username: res.user?.username || '',
           email: res.user?.email || '',
-          firstName: res.user?.first_name || '',
-          lastName: res.user?.last_name || '',
         };
   
         localStorage.setItem('accessToken', res.access);
@@ -100,5 +97,20 @@ export class ResetPasswordComponent {
       }
     });
   }
-  
+
+  openLoginModal(): void {
+    console.log('Opening login modal from register');
+    this.showLoginModal = true;
+  }
+
+  onLoginModalClose(): void {
+    console.log('Login modal closed');
+    this.showLoginModal = false;
+  }
+
+  onLoginModalSuccess(): void {
+    console.log('Login successful from modal');
+    this.showLoginModal = false;
+    this.router.navigate(['/home']);
+  }
 }

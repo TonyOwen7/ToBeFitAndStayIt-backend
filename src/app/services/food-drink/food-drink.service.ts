@@ -2,21 +2,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface Food {
-  id: number;
-  name: string;
-  calories_per_mass: number;
-  mass: number;
-  water_percentage: number;
-}
-
-export interface Drink {
-  id: number;
-  name: string;
-  calories_per_volume: number;
-  volume: number;
-}
+import { Food } from '../../models/food-drink.model'; 
+import { Drink } from '../../models/food-drink.model';
 
 @Injectable({
   providedIn: 'root'

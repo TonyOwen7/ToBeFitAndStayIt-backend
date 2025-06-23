@@ -1,13 +1,19 @@
 // hydration.component.ts
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { HeaderComponent } from '../../core/components/header/header.component';
 import { FooterComponent } from '../../core/components/footer/footer.component';
-import { FoodDrinkService, Food, Drink } from '../../services/food-drink/food-drink.service';
+import { FoodDrinkService } from '../../services/food-drink/food-drink.service';
+import { Food } from '../../models/food-drink.model';
+import { Drink } from '../../models/food-drink.model';
+import { UserProfile } from '../../models/user-profile.model';
 import { Subscription } from 'rxjs';
 import { AuthStateService } from '../../services/auth-state/auth-state.service';
+import { CustomItemsService } from '../../services/custom-items/custom-items.service';
+import { LoginModalComponent } from '../../auth/login-modal/login-modal.component';
+import { Router } from  '@angular/router';;
 
 interface WaterItem {
   id: number;
@@ -31,15 +37,17 @@ interface HealthIndicator {
   description: string;
 }
 
-
 @Component({
   selector: 'app-hydration',
-  imports: [CommonModule, FormsModule, HttpClientModule, HeaderComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, HttpClientModule, HeaderComponent, FooterComponent, LoginModalComponent],
   templateUrl: './hydration.component.html',
   styleUrls: ['./hydration.component.css'],
   providers: [FoodDrinkService]
 })
-export class HydrationComponent implements OnInit {
+export class HydrationComponent implements OnInit, OnDestroy {
+  showLoginModal = false;
+  isOpen = false;
+
   waterItems: WaterItem[] = [];
   totalWater: number = 0;
   totalCalories: number = 0;
@@ -49,21 +57,34 @@ export class HydrationComponent implements OnInit {
   activityLevel: string = 'low';
   climate: string = 'normal';
   dailyWaterGoal: number = 2000;
+  isLoggedIn = false;
+  showAllContent = false;
 
   // Form inputs
   drinkName: string = '';
   quantity: number | null = null;
   volumePerUnit: number | null = null;
-
-  
   
   // Food/Drink selection
   availableFoods: Food[] = [];
   availableDrinks: Drink[] = [];
   selectedFood: Food | null = null;
   selectedDrink: Drink | null = null;
+  selectedFoodName: string = '';
+  selectedDrinkName: string = '';
   selectedFoodQuantity: number | null = null;
   selectedDrinkQuantity: number | null = null;
+  selectedDrinkVolume: number | null = null;
+  selectedFoodMass: number | null = null;
+
+  // Custom item creation
+  customDrinkName: string = '';
+  customDrinkVolume: number | null = null;
+  customDrinkCalories: number | null = null;
+  customFoodName: string = '';
+  customFoodMass: number | null = null;
+  customFoodCalories: number | null = null;
+  customFoodWaterPercentage: number | null = null;
   
   // UI state
   activeTab: 'water' | 'drinks' | 'foods' = 'water';
@@ -71,22 +92,97 @@ export class HydrationComponent implements OnInit {
   error: string = '';
 
   private authSubscription = new Subscription();
+  private profileSubscription = new Subscription();
 
   constructor(
+    private router: Router,
     private authState: AuthStateService,
-    private foodDrinkService: FoodDrinkService
+    private foodDrinkService: FoodDrinkService,
+    private customItemsService: CustomItemsService
   ) {}
 
   ngOnInit(): void {
     this.authSubscription.add(
       this.authState.isLoggedIn$.subscribe(isLoggedIn => {
+        this.isLoggedIn = isLoggedIn;
         this.loadFoodsAndDrinks(isLoggedIn);
+        if (isLoggedIn) {
+          this.loadUserProfile();
+          this.showAllContent = true;
+        } else {
+          this.resetToDefaultValues();
+        }
       })
-    );  
+    );
+    
+    this.profileSubscription.add(
+      this.authState.userProfile$.subscribe(profile => {
+        if (profile) {
+          this.applyUserProfile(profile);
+        }
+      })
+    );
   }
 
   ngOnDestroy(): void {
     this.authSubscription.unsubscribe();
+    this.profileSubscription.unsubscribe();
+  }
+
+  // private loadUserProfile(): void {
+  //   this.userService.getUserProfile().subscribe({
+  //     next: (profile) => {
+  //       console.log(profile)
+  //       this.applyUserProfile(profile);
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading user profile', error);
+  //       const currentProfile = this.authState.getCurrentUser();
+  //       if (currentProfile) {
+  //         this.applyUserProfile(currentProfile);
+  //       } else {
+  //         this.resetToDefaultValues();
+  //       }
+  //     }
+  //   });
+  // }
+
+  private loadUserProfile(): void {
+    this.authState.userProfile$.subscribe(profile => {
+      if (profile) {
+        console.log('Loaded profile from auth state:', profile);
+        this.applyUserProfile(profile);
+      } else {
+        const fallbackProfile = this.authState.getCurrentUser();
+        if (fallbackProfile) {
+          this.applyUserProfile(fallbackProfile);
+        } else {
+          this.resetToDefaultValues();
+        }
+      }
+    });
+  }
+  
+
+  private applyUserProfile(profile: UserProfile): void {
+    console.log('Applying user profile:', profile);
+    console.log("weight test:", profile.weight);
+    this.bodyWeight = profile.weight || 0;
+    this.gender = profile.gender || 'male';
+    this.age = profile.age || 0;
+    this.activityLevel = profile.activityLevel || 'low';
+    this.climate = profile.climate || 'normal';
+    this.dailyWaterGoal = profile.dailyWaterGoal || 2000;
+    this.calculateGoal();
+  }
+
+  private resetToDefaultValues(): void {
+    this.bodyWeight = 0;
+    this.gender = 'male';
+    this.age = 0;
+    this.activityLevel = 'low';
+    this.climate = 'normal';
+    this.dailyWaterGoal = 2000;
   }
 
   private loadFoodsAndDrinks(isLoggedIn: boolean): void {
@@ -94,17 +190,14 @@ export class HydrationComponent implements OnInit {
     this.error = '';
 
     if (isLoggedIn) {
-      // Load real data when authenticated
       this.loadRealData();
     } else {
-      // Use mock data when not authenticated
       this.loadMockData();
       this.isLoading = false;
     }
   }
 
   private loadRealData(): void {
-    // Load foods from API
     this.foodDrinkService.getFoods().subscribe({
       next: (foods) => {
         this.availableFoods = foods;
@@ -118,7 +211,6 @@ export class HydrationComponent implements OnInit {
       }
     });
 
-    // Load drinks from API
     this.foodDrinkService.getDrinks().subscribe({
       next: (drinks) => {
         this.availableDrinks = drinks;
@@ -217,21 +309,62 @@ export class HydrationComponent implements OnInit {
     this.clearWaterInputs();
   }
 
-  // Add selected drink
+  // Calculation helper methods
+calculateDrinkVolume(): number {
+  if (!this.selectedDrink || !this.selectedDrinkQuantity) return 0;
+  
+  const volumePerUnit = this.selectedDrinkVolume || this.selectedDrink.volume;
+  return this.selectedDrinkQuantity * volumePerUnit;
+}
+
+calculateDrinkCalories(): number {
+  if (!this.selectedDrink || !this.selectedDrinkQuantity) return 0;
+  
+  const volumePerUnit = this.selectedDrinkVolume || this.selectedDrink.volume;
+  const caloriesPerUnit = this.selectedDrink.calories_per_volume * 
+                         (volumePerUnit / this.selectedDrink.volume);
+  
+  return this.selectedDrinkQuantity * caloriesPerUnit;
+}
+
+calculateFoodWater(): number {
+  if (!this.selectedFood || !this.selectedFoodQuantity) return 0;
+  
+  const massPerUnit = this.selectedFoodMass || this.selectedFood.mass;
+  const waterContent = (massPerUnit * this.selectedFood.water_percentage) / 100;
+  
+  return this.selectedFoodQuantity * waterContent;
+}
+
+calculateFoodCalories(): number {
+  if (!this.selectedFood || !this.selectedFoodQuantity) return 0;
+  
+  const massPerUnit = this.selectedFoodMass || this.selectedFood.mass;
+  const caloriesPerUnit = this.selectedFood.calories_per_mass * 
+                         (massPerUnit / this.selectedFood.mass);
+  
+  return this.selectedFoodQuantity * caloriesPerUnit;
+}
+
+  // Updated add methods
   addSelectedDrink(): void {
     if (!this.selectedDrink || !this.selectedDrinkQuantity) {
       this.showError('Please select a drink and specify quantity');
       return;
     }
 
-    const totalVolume = this.selectedDrinkQuantity * this.selectedDrink.volume;
-    const totalCalories = this.selectedDrinkQuantity * this.selectedDrink.calories_per_volume;
+    const volumePerUnit = this.selectedDrinkVolume || this.selectedDrink.volume;
+    const caloriesPerUnit = this.selectedDrink.calories_per_volume * 
+                          (volumePerUnit / this.selectedDrink.volume);
+    
+    const totalVolume = this.selectedDrinkQuantity * volumePerUnit;
+    const totalCalories = this.selectedDrinkQuantity * caloriesPerUnit;
     
     const drinkItem: WaterItem = {
       id: Date.now(),
       name: this.selectedDrink.name,
       quantity: this.selectedDrinkQuantity,
-      volumePerUnit: this.selectedDrink.volume,
+      volumePerUnit: volumePerUnit,
       totalVolume: totalVolume,
       type: 'drink',
       calories: totalCalories
@@ -243,29 +376,32 @@ export class HydrationComponent implements OnInit {
     this.clearDrinkInputs();
   }
 
-  // Add selected food
   addSelectedFood(): void {
     if (!this.selectedFood || !this.selectedFoodQuantity) {
       this.showError('Please select a food and specify quantity');
       return;
     }
 
-    const totalMass = this.selectedFoodQuantity * this.selectedFood.mass;
-    const waterContent = (totalMass * this.selectedFood.water_percentage) / 100;
-    const totalCalories = this.selectedFoodQuantity * this.selectedFood.calories_per_mass;
+    const massPerUnit = this.selectedFoodMass || this.selectedFood.mass;
+    const waterContent = (massPerUnit * this.selectedFood.water_percentage) / 100;
+    const caloriesPerUnit = this.selectedFood.calories_per_mass * 
+                          (massPerUnit / this.selectedFood.mass);
+    
+    const totalWater = this.selectedFoodQuantity * waterContent;
+    const totalCalories = this.selectedFoodQuantity * caloriesPerUnit;
     
     const foodItem: WaterItem = {
       id: Date.now(),
       name: this.selectedFood.name,
       quantity: this.selectedFoodQuantity,
       volumePerUnit: waterContent,
-      totalVolume: waterContent,
+      totalVolume: totalWater,
       type: 'food',
       calories: totalCalories
     };
 
     this.waterItems.push(foodItem);
-    this.totalWater += waterContent;
+    this.totalWater += totalWater;
     this.totalCalories += totalCalories;
     this.clearFoodInputs();
   }
@@ -297,11 +433,13 @@ export class HydrationComponent implements OnInit {
 
   private clearDrinkInputs(): void {
     this.selectedDrink = null;
+    this.selectedDrinkName = '';
     this.selectedDrinkQuantity = null;
   }
 
   private clearFoodInputs(): void {
     this.selectedFood = null;
+    this.selectedFoodName = '';
     this.selectedFoodQuantity = null;
   }
 
@@ -322,7 +460,7 @@ export class HydrationComponent implements OnInit {
   }
 
   calculateGoal(): void {
-    if (this.bodyWeight > 0) {
+    if (this.bodyWeight > 0 && this.age > 0) {
       let baseWater: number;
       
       if (this.gender === 'male') {
@@ -361,13 +499,18 @@ export class HydrationComponent implements OnInit {
       } else {
         this.dailyWaterGoal = Math.max(1600, Math.min(3500, this.dailyWaterGoal));
       }
+
+      // For guest users, show all content after setting goal
+      if (!this.isLoggedIn) {
+        this.showAllContent = true;
+      }
     }
   }
 
   // Progress calculations
   get progressPercentage(): number {
     if (this.dailyWaterGoal > 0) {
-      return Math.min((this.totalWater / this.dailyWaterGoal) * 100);
+      return Math.min((this.totalWater / this.dailyWaterGoal) * 100, 100);
     }
     return 0;
   }
@@ -387,41 +530,36 @@ export class HydrationComponent implements OnInit {
       return { color: '#ffc107', text: 'Fair Hydration', isOver: false };
     } else if (percentage < 100) {
       return { color: '#4caf50', text: 'Well Hydrated', isOver: false };
-    } else if (percentage >= 120){
-      return { color: '#9c27b0', text: 'Overhydrated!', isOver: true };
-    }
-    else {
+    } else {
       return { color: '#9c27b0', text: 'Overhydrated!', isOver: true };
     }
   }
 
   // Add method to calculate overhydration amount
-get overhydrationAmount(): number {
-  if (this.totalWater > this.dailyWaterGoal) {
-    return this.totalWater - this.dailyWaterGoal;
+  get overhydrationAmount(): number {
+    if (this.totalWater > this.dailyWaterGoal) {
+      return this.totalWater - this.dailyWaterGoal;
+    }
+    return 0;
   }
-  return 0;
-}
 
-// Add method for overhydration warnings
-get overhydrationWarnings(): string[] {
-  const warnings = [];
-  const percentage = this.progressPercentage;
-  
-  if (percentage > 120) {
-    warnings.push('Hyponatremia risk: Dangerously low sodium levels');
-    warnings.push('Potential for water intoxication');
-    warnings.push('Kidney stress from processing excess water');
-  } else if (percentage > 100) {
-    warnings.push('Electrolyte imbalance possible');
-    warnings.push('Frequent urination disrupting daily activities');
-    warnings.push('Potential for disrupted sleep from nighttime bathroom trips');
+  // Add method for overhydration warnings
+  get overhydrationWarnings(): string[] {
+    const warnings = [];
+    const percentage = this.progressPercentage;
+    
+    if (percentage > 120) {
+      warnings.push('Hyponatremia risk: Dangerously low sodium levels');
+      warnings.push('Potential for water intoxication');
+      warnings.push('Kidney stress from processing excess water');
+    } else if (percentage > 100) {
+      warnings.push('Electrolyte imbalance possible');
+      warnings.push('Frequent urination disrupting daily activities');
+      warnings.push('Potential for disrupted sleep from nighttime bathroom trips');
+    }
+    
+    return warnings;
   }
-  
-  return warnings;
-}
-
-
 
   // Recommendations
   get recommendations(): Recommendation[] {
@@ -491,14 +629,20 @@ get overhydrationWarnings(): string[] {
   }
 
   // Helper functions for template
-  onFoodChange(event: any): void {
-    const foodId = parseInt(event.target.value);
-    this.selectedFood = this.availableFoods.find(food => food.id === foodId) || null;
+  onFoodChange(): void {
+    if (this.selectedFoodName) {
+      this.selectedFood = this.availableFoods.find(food => 
+        food.name.toLowerCase() === this.selectedFoodName.toLowerCase()
+      ) || null;
+    }
   }
 
-  onDrinkChange(event: any): void {
-    const drinkId = parseInt(event.target.value);
-    this.selectedDrink = this.availableDrinks.find(drink => drink.id === drinkId) || null;
+  onDrinkChange(): void {
+    if (this.selectedDrinkName) {
+      this.selectedDrink = this.availableDrinks.find(drink => 
+        drink.name.toLowerCase() === this.selectedDrinkName.toLowerCase()
+      ) || null;
+    }
   }
 
   getItemTypeIcon(type: string): string {
@@ -519,181 +663,316 @@ get overhydrationWarnings(): string[] {
     }
   }
 
-// Add this method to the component class
-getHealthInsights(): HealthIndicator[] {
-  const percentage = this.progressPercentage;
-  const insights: HealthIndicator[] = [];
+  // Health insights method
+  getHealthInsights(): HealthIndicator[] {
+    const percentage = this.progressPercentage;
+    const insights: HealthIndicator[] = [];
 
-  // Urine Color
-  if (percentage < 25) {
-    insights.push({ 
-      name: 'Urine Color', 
-      icon: '💧', 
-      status: 'Dark Amber/Brown', 
-      description: 'Indicates severe dehydration. Your kidneys are conserving water.' 
-    });
-  } else if (percentage < 50) {
-    insights.push({ 
-      name: 'Urine Color', 
-      icon: '💧', 
-      status: 'Dark Yellow', 
-      description: 'Significant dehydration. Your body needs more fluids.' 
-    });
-  } else if (percentage < 75) {
-    insights.push({ 
-      name: 'Urine Color', 
-      icon: '💧', 
-      status: 'Light Yellow', 
-      description: 'Mild dehydration. Aim for pale yellow urine.' 
-    });
-  } else if (percentage < 100) {
-    insights.push({ 
-      name: 'Urine Color', 
-      icon: '💧', 
-      status: 'Pale Yellow', 
-      description: 'Ideal hydration level. Keep maintaining this!' 
-    });
-  } else {
-    insights.push({ 
-      name: 'Urine Color', 
-      icon: '💧', 
-      status: 'Clear', 
-      description: 'Overhydration risk. Too clear indicates diluted electrolytes.' 
-    });
+    // Urine Color
+    if (percentage < 25) {
+      insights.push({ 
+        name: 'Urine Color', 
+        icon: '💧', 
+        status: 'Dark Amber/Brown', 
+        description: 'Indicates severe dehydration. Your kidneys are conserving water.' 
+      });
+    } else if (percentage < 50) {
+      insights.push({ 
+        name: 'Urine Color', 
+        icon: '💧', 
+        status: 'Dark Yellow', 
+        description: 'Significant dehydration. Your body needs more fluids.' 
+      });
+    } else if (percentage < 75) {
+      insights.push({ 
+        name: 'Urine Color', 
+        icon: '💧', 
+        status: 'Light Yellow', 
+        description: 'Mild dehydration. Aim for pale yellow urine.' 
+      });
+    } else if (percentage < 100) {
+      insights.push({ 
+        name: 'Urine Color', 
+        icon: '💧', 
+        status: 'Pale Yellow', 
+        description: 'Ideal hydration level. Keep maintaining this!' 
+      });
+    } else {
+      insights.push({ 
+        name: 'Urine Color', 
+        icon: '💧', 
+        status: 'Clear', 
+        description: 'Overhydration risk. Too clear indicates diluted electrolytes.' 
+      });
+    }
+
+    // Energy Level
+    if (percentage < 30) {
+      insights.push({ 
+        name: 'Energy Level', 
+        icon: '⚡', 
+        status: 'Very Low', 
+        description: 'Dehydration causes fatigue as cells aren\'t getting enough fluid.' 
+      });
+    } else if (percentage < 60) {
+      insights.push({ 
+        name: 'Energy Level', 
+        icon: '⚡', 
+        status: 'Low', 
+        description: 'Mild dehydration reduces blood volume, making your heart work harder.' 
+      });
+    } else if (percentage < 90) {
+      insights.push({ 
+        name: 'Energy Level', 
+        icon: '⚡', 
+        status: 'Normal', 
+        description: 'Proper hydration supports optimal cellular energy production.' 
+      });
+    } else if (percentage < 110) {
+      insights.push({ 
+        name: 'Energy Level', 
+        icon: '⚡', 
+        status: 'Good', 
+        description: 'Well-hydrated cells provide steady energy throughout the day.' 
+      });
+    } else {
+      insights.push({ 
+        name: 'Energy Level', 
+        icon: '⚡', 
+        status: 'Sluggish', 
+        description: 'Overhydration dilutes electrolytes, causing fatigue and weakness.' 
+      });
+    }
+
+    // Sleep Quality
+    if (percentage < 40) {
+      insights.push({ 
+        name: 'Sleep Quality', 
+        icon: '😴', 
+        status: 'Poor', 
+        description: 'Dehydration causes muscle cramps and restless sleep.' 
+      });
+    } else if (percentage < 70) {
+      insights.push({ 
+        name: 'Sleep Quality', 
+        icon: '😴', 
+        status: 'Fair', 
+        description: 'Mild dehydration may cause nighttime awakenings.' 
+      });
+    } else if (percentage < 100) {
+      insights.push({ 
+        name: 'Sleep Quality', 
+        icon: '😴', 
+        status: 'Good', 
+        description: 'Proper hydration supports natural sleep cycles.' 
+      });
+    } else {
+      insights.push({ 
+        name: 'Sleep Quality', 
+        icon: '😴', 
+        status: 'Disrupted', 
+        description: 'Overhydration causes frequent nighttime bathroom trips.' 
+      });
+    }
+
+    // Nutrition & Hunger
+    if (percentage < 30) {
+      insights.push({ 
+        name: 'Nutrition & Hunger', 
+        icon: '🍽️', 
+        status: 'Increased Hunger', 
+        description: 'Dehydration is often mistaken for hunger, leading to overeating.' 
+      });
+    } else if (percentage < 60) {
+      insights.push({ 
+        name: 'Nutrition & Hunger', 
+        icon: '🍽️', 
+        status: 'Cravings', 
+        description: 'Mild dehydration impairs nutrient absorption and increases cravings.' 
+      });
+    } else if (percentage < 100) {
+      insights.push({ 
+        name: 'Nutrition & Hunger', 
+        icon: '🍽️', 
+        status: 'Balanced', 
+        description: 'Proper hydration supports metabolism and nutrient utilization.' 
+      });
+    } else {
+      insights.push({ 
+        name: 'Nutrition & Hunger', 
+        icon: '🍽️', 
+        status: 'Reduced Appetite', 
+        description: 'Overhydration creates false fullness, reducing nutrient intake.' 
+      });
+    }
+
+    // Health Risks
+    if (percentage < 30) {
+      insights.push({ 
+        name: 'Health Risks', 
+        icon: '⚠️', 
+        status: 'High', 
+        description: 'Risk of kidney stones, urinary infections, and heat exhaustion.' 
+      });
+    } else if (percentage < 60) {
+      insights.push({ 
+        name: 'Health Risks', 
+        icon: '⚠️', 
+        status: 'Moderate', 
+        description: 'Increased risk of constipation and impaired cognitive function.' 
+      });
+    } else if (percentage < 100) {
+      insights.push({ 
+        name: 'Health Risks', 
+        icon: '⚠️', 
+        status: 'Low', 
+        description: 'Optimal hydration supports all bodily functions.' 
+      });
+    } else {
+      insights.push({ 
+        name: 'Health Risks', 
+        icon: '⚠️', 
+        status: 'Hyponatremia Risk', 
+        description: 'Dangerously low sodium levels causing nausea, headaches, confusion.' 
+      });
+    }
+
+    return insights;    return insights;
   }
 
-  // Energy Level
-  if (percentage < 30) {
-    insights.push({ 
-      name: 'Energy Level', 
-      icon: '⚡', 
-      status: 'Very Low', 
-      description: 'Dehydration causes fatigue as cells aren\'t getting enough fluid.' 
-    });
-  } else if (percentage < 60) {
-    insights.push({ 
-      name: 'Energy Level', 
-      icon: '⚡', 
-      status: 'Low', 
-      description: 'Mild dehydration reduces blood volume, making your heart work harder.' 
-    });
-  } else if (percentage < 90) {
-    insights.push({ 
-      name: 'Energy Level', 
-      icon: '⚡', 
-      status: 'Normal', 
-      description: 'Proper hydration supports optimal cellular energy production.' 
-    });
-  } else if (percentage < 110) {
-    insights.push({ 
-      name: 'Energy Level', 
-      icon: '⚡', 
-      status: 'Good', 
-      description: 'Well-hydrated cells provide steady energy throughout the day.' 
-    });
-  } else {
-    insights.push({ 
-      name: 'Energy Level', 
-      icon: '⚡', 
-      status: 'Sluggish', 
-      description: 'Overhydration dilutes electrolytes, causing fatigue and weakness.' 
-    });
+  // Custom item creation
+  addCustomDrink(): void {
+    if (!this.customDrinkName || !this.customDrinkVolume) {
+      this.showError('Please enter drink name and volume');
+      return;
+    }
+
+    const newDrink: Drink = {
+      id: 0,
+      name: this.customDrinkName,
+      volume: this.customDrinkVolume,
+      calories_per_volume: this.customDrinkCalories || 0
+    };
+
+    if (this.isLoggedIn) {
+      this.customItemsService.createCustomDrink(newDrink).subscribe({
+        next: (savedDrink) => {
+          this.availableDrinks.push(savedDrink);
+          this.selectedDrink = savedDrink;
+          this.selectedDrinkName = savedDrink.name;
+          this.clearCustomDrinkInputs();
+        },
+        error: (error) => {
+          console.error('Failed to save custom drink', error);
+          this.showError('Failed to save custom drink');
+        }
+      });
+    } else {
+      newDrink.id = -Math.abs(Date.now());
+      this.availableDrinks.push(newDrink);
+      this.selectedDrink = newDrink;
+      this.selectedDrinkName = newDrink.name;
+      this.clearCustomDrinkInputs();
+    }
   }
 
-  // Sleep Quality
-  if (percentage < 40) {
-    insights.push({ 
-      name: 'Sleep Quality', 
-      icon: '😴', 
-      status: 'Poor', 
-      description: 'Dehydration causes muscle cramps and restless sleep.' 
-    });
-  } else if (percentage < 70) {
-    insights.push({ 
-      name: 'Sleep Quality', 
-      icon: '😴', 
-      status: 'Fair', 
-      description: 'Mild dehydration may cause nighttime awakenings.' 
-    });
-  } else if (percentage < 100) {
-    insights.push({ 
-      name: 'Sleep Quality', 
-      icon: '😴', 
-      status: 'Good', 
-      description: 'Proper hydration supports natural sleep cycles.' 
-    });
-  } else {
-    insights.push({ 
-      name: 'Sleep Quality', 
-      icon: '😴', 
-      status: 'Disrupted', 
-      description: 'Overhydration causes frequent nighttime bathroom trips.' 
-    });
+  addCustomFood(): void {
+    if (!this.customFoodName || !this.customFoodMass || !this.customFoodWaterPercentage) {
+      this.showError('Please fill all required fields');
+      return;
+    }
+
+    const newFood: Food = {
+      id: 0,
+      name: this.customFoodName,
+      mass: this.customFoodMass,
+      calories_per_mass: this.customFoodCalories || 0,
+      water_percentage: this.customFoodWaterPercentage
+    };
+
+    if (this.isLoggedIn) {
+      this.customItemsService.createCustomFood(newFood).subscribe({
+        next: (savedFood) => {
+          this.availableFoods.push(savedFood);
+          this.selectedFood = savedFood;
+          this.selectedFoodName = savedFood.name;
+          this.clearCustomFoodInputs();
+        },
+        error: (error) => {
+          console.error('Failed to save custom food', error);
+          this.showError('Failed to save custom food');
+        }
+      });
+    } else {
+      newFood.id = -Math.abs(Date.now());
+      this.availableFoods.push(newFood);
+      this.selectedFood = newFood;
+      this.selectedFoodName = newFood.name;
+      this.clearCustomFoodInputs();
+    }
   }
 
-  // Nutrition & Hunger
-  if (percentage < 30) {
-    insights.push({ 
-      name: 'Nutrition & Hunger', 
-      icon: '🍽️', 
-      status: 'Increased Hunger', 
-      description: 'Dehydration is often mistaken for hunger, leading to overeating.' 
-    });
-  } else if (percentage < 60) {
-    insights.push({ 
-      name: 'Nutrition & Hunger', 
-      icon: '🍽️', 
-      status: 'Cravings', 
-      description: 'Mild dehydration impairs nutrient absorption and increases cravings.' 
-    });
-  } else if (percentage < 100) {
-    insights.push({ 
-      name: 'Nutrition & Hunger', 
-      icon: '🍽️', 
-      status: 'Balanced', 
-      description: 'Proper hydration supports metabolism and nutrient utilization.' 
-    });
-  } else {
-    insights.push({ 
-      name: 'Nutrition & Hunger', 
-      icon: '🍽️', 
-      status: 'Reduced Appetite', 
-      description: 'Overhydration creates false fullness, reducing nutrient intake.' 
-    });
+  clearCustomDrinkInputs(): void {
+    this.customDrinkName = '';
+    this.customDrinkVolume = null;
+    this.customDrinkCalories = null;
   }
 
-  // Health Risks
-  if (percentage < 30) {
-    insights.push({ 
-      name: 'Health Risks', 
-      icon: '⚠️', 
-      status: 'High', 
-      description: 'Risk of kidney stones, urinary infections, and heat exhaustion.' 
-    });
-  } else if (percentage < 60) {
-    insights.push({ 
-      name: 'Health Risks', 
-      icon: '⚠️', 
-      status: 'Moderate', 
-      description: 'Increased risk of constipation and impaired cognitive function.' 
-    });
-  } else if (percentage < 100) {
-    insights.push({ 
-      name: 'Health Risks', 
-      icon: '⚠️', 
-      status: 'Low', 
-      description: 'Optimal hydration supports all bodily functions.' 
-    });
-  } else {
-    insights.push({ 
-      name: 'Health Risks', 
-      icon: '⚠️', 
-      status: 'Hyponatremia Risk', 
-      description: 'Dangerously low sodium levels causing nausea, headaches, confusion.' 
-    });
+  clearCustomFoodInputs(): void {
+    this.customFoodName = '';
+    this.customFoodMass = null;
+    this.customFoodCalories = null;
+    this.customFoodWaterPercentage = null;
   }
 
-  return insights;
-}
+  public saveSuccess = false;
 
+  // Sync profile with backend
+  syncProfileWithBackend(): void {
+    if (!this.isLoggedIn) return;
+    const profileUpdate = {
+      weight: this.bodyWeight,
+      gender: this.gender,
+      age: this.age,
+      activity_level: this.activityLevel,
+      climate: this.climate,
+      dailyWaterGoal: this.dailyWaterGoal
+    };
+  
+    this.authState.updateUserProfile(profileUpdate);
+    this.saveSuccess = true;
+
+    setTimeout(() => this.saveSuccess = false, 3000);
+  }
+  
+  
+
+  // Input handlers
+  onWeightBlur(): void {
+    this.calculateGoal();
+  }
+
+  onAgeBlur(): void {
+    this.calculateGoal();
+  }
+
+  onClimateChange(): void {
+    this.calculateGoal();
+  }
+
+  openLoginModal(): void {
+    console.log('Opening login modal from register');
+    this.showLoginModal = true;
+  }
+
+  onLoginModalClose(): void {
+    console.log('Login modal closed');
+    this.showLoginModal = false;
+  }
+
+  onLoginModalSuccess(): void {
+    console.log('Login successful from modal');
+    this.showLoginModal = false;
+    this.router.navigate(['/home']);
+  }
 }

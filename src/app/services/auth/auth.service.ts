@@ -1,8 +1,9 @@
-// src/app/core/services/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
+import { Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 interface LoginResponse {
   access: string;
@@ -36,7 +37,10 @@ type AuthResponse = LoginResponse | RegisterResponse;
 export class AuthService {
   private apiUrl = 'http://localhost:8000/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   login(credentials: { email: string; password: string }): Observable<AuthResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login/`, credentials).pipe(
@@ -72,11 +76,13 @@ export class AuthService {
     return localStorage.getItem('refreshToken');
   }
 
-  logout(refreshToken: string | null): Observable<any> {
-    // If no refresh token exists, skip backend logout
-    if (!refreshToken) {
-      return of({ message: 'No refresh token found' });
+  logout(): Observable<any> {
+    let refreshToken: string | null = null;
+    if (isPlatformBrowser(this.platformId)) {
+      refreshToken = localStorage.getItem('refreshToken'); // or 'accessToken' if that's what you're using
     }
+
+    console.log('Logging out with refresh token:', refreshToken);
 
     // Send logout request to invalidate refresh token
     return this.http.post(

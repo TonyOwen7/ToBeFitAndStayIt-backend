@@ -122,6 +122,58 @@
                             </div>
                         </div>
 
+                        <!-- Add after Age and Gender Row -->
+                        <!-- Weight and Height Row -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="weight" class="form-label">
+                                    <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M3 6l3-3m0 0l3 3M6 6v14m12-14l3-3m0 0l-3-3m3 3v14" stroke="currentColor" stroke-width="2"/>
+                                    </svg>
+                                    Weight (kg)
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="weight" name="weight" min="1" step="0.1"
+                                        class="form-input" placeholder="Enter your weight"
+                                        [(ngModel)]="weight">
+                                    <div class="input-border"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="height" class="form-label">
+                                    <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 22v-2m0-16V2M8 5l4-3 4 3v14l-4 3-4-3V5z" stroke="currentColor" stroke-width="2"/>
+                                    </svg>
+                                    Height (cm)
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="height" name="height" min="1" step="0.1"
+                                        class="form-input" placeholder="Enter your height"
+                                        [(ngModel)]="height">
+                                    <div class="input-border"></div>
+                                </div>
+                            </div>
+
+                            <!-- Climate Preference -->
+                            <div class="form-group">
+                                <label for="climate" class="form-label">
+                                <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zM6.5 17A7.5 7.5 0 0117 6.5" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                Current Climate
+                                </label>
+                                <div class="input-wrapper">
+                                <select id="climate" name="climate" class="form-input" [(ngModel)]="climate">
+                                    <option value="">Select Climate</option>
+                                    <option value="normal">Normal</option>
+                                    <option value="hot">Hot/Humid</option>
+                                    <option value="cold">Cold</option>
+                                </select>
+                                <div class="input-border"></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Password Fields -->
                         <div class="form-group">
                             <label for="password" class="form-label">
@@ -235,14 +287,14 @@
                             </label>
                         </div>
 
-                        <div class="checkbox-group">
+                        <!-- <div class="checkbox-group">
                             <label class="checkbox-wrapper">
                                 <input type="checkbox" id="agreeNewsletter" name="agreeNewsletter" [(ngModel)]="agreeNewsletter">
                                 <span class="checkbox-label">
                                     I'd like to receive wellness tips and updates via email
                                 </span>
                             </label>
-                        </div>
+                        </div> -->
 
                         <!-- Submit Button -->
                         <button type="submit" class="submit-btn" [disabled]="isLoading || !registerForm.form.valid">

@@ -40,10 +40,10 @@ export class RegisterComponent implements OnInit {
   activityLevel: string = '';
   healthGoal: string = '';
   agreeTerms: boolean = false;
-  agreeNewsletter: boolean = false;
+  // agreeNewsletter: boolean = false;
   weight: number | null = null;
   height: number | null = null;
-
+  climate: string = '';
   // UI state  
   passwordVisible: boolean = false;
   confirmPasswordVisible: boolean = false;
@@ -100,7 +100,8 @@ export class RegisterComponent implements OnInit {
         height: this.height,
         activity_level: this.activityLevel, // Backend expects activity_level
         health_goal: this.healthGoal, // Backend expects health_goal
-        wants_newsletter: this.agreeNewsletter // Backend expects wants_newsletter
+        climate: this.climate,
+        // wants_newsletter: this.agreeNewsletter // Backend expects wants_newsletter
       };
 
       console.log('Sending registration data:', registrationData);
@@ -120,8 +121,14 @@ export class RegisterComponent implements OnInit {
               email: res.user?.email || this.email,
               firstName: res.user?.first_name || this.firstName,
               lastName: res.user?.last_name || this.lastName,
-              avatar: res.user?.avatar
-            };
+              age: res.user?.age || this.age,
+              gender: res.user?.gender || this.gender,
+              weight: res.user?.weight || this.weight,
+              height: res.user?.height || this.height,
+              activityLevel: res.user?.activity_level || this.activityLevel,
+              healthGoal: res.user?.health_goal || this.healthGoal,
+              climate: res.user?.climate || this.climate,
+            };            
             
             // Update AuthStateService with token and user profile
             this.authState.login(res.access, userProfile);
@@ -304,7 +311,7 @@ export class RegisterComponent implements OnInit {
     console.log('Login successful from modal');
     this.showLoginModal = false;
     this.loginSuccess.emit();
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/home']);
   }
 
   private isFormValid(): boolean {
@@ -329,10 +336,11 @@ export class RegisterComponent implements OnInit {
     this.confirmPassword = '';
     this.activityLevel = '';
     this.healthGoal = '';
+    this.climate = ''; 
     this.weight = null;
     this.height = null;
     this.agreeTerms = false;
-    this.agreeNewsletter = false;
+    // this.agreeNewsletter = false;
     this.passwordVisible = false;
     this.confirmPasswordVisible = false;
     this.errorMessage = '';
