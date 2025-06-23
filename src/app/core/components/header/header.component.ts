@@ -5,10 +5,11 @@ import { Router, RouterLink } from '@angular/router';
 import { LoginModalComponent } from '../../../auth/login-modal/login-modal.component';
 import { UserProfile } from '../../../models/user-profile.model';
 import { AuthStateService } from '../../../services/auth-state/auth-state.service';
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest } from 'rxjs';
 import { AuthService } from '../../../services/auth/auth.service';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { distinctUntilChanged, filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-header',
@@ -35,6 +36,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   showLoginModal = false;
   isMobileNavOpen = false;
   isRegisterMode = false;
+  authInitialized = false;
   
   private authSubscription = new Subscription();
 
@@ -46,18 +48,62 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    console.log('🚀 Header component initializing...');
+    
+    // Wait for auth to be initialized before subscribing to state changes
+    this.authSubscription.add(
+      this.authState.authInitialized$
+        .pipe(filter(initialized => initialized))
+        .subscribe(() => {
+          console.log('✅ Auth initialized, setting up subscriptions');
+          this.authInitialized = true;
+          this.setupAuthSubscriptions();
+        })
+    );
+  }
+
+  private setupAuthSubscriptions(): void {
+    // Only set up subscriptions if we're in the browser
+    if (!isPlatformBrowser(this.platformId)) {
+      console.log('🖥️ Server-side rendering - skipping auth subscriptions');
+      return;
+    }
+
+    console.log('🔧 Setting up auth subscriptions in browser...');
+
     // Subscribe to authentication state changes
     this.authSubscription.add(
-      this.authState.isLoggedIn$.subscribe(status => {
-        console.log('Auth status changed in header:', status);
-        this.isLoggedIn = status;
-      })
+      this.authState.isLoggedIn$
+        .pipe(distinctUntilChanged())
+        .subscribe(status => {
+          console.log('🔄 Auth status changed in header:', status);
+          this.isLoggedIn = status;
+        })
     );
 
     this.authSubscription.add(
-      this.authState.userProfile$.subscribe(profile => {
-        console.log('User profile changed in header:', profile);
-        this.userProfile = profile;
+      this.authState.userProfile$
+        .pipe(
+          distinctUntilChanged((a, b) => {
+            // Deep comparison for user profiles
+            return JSON.stringify(a) === JSON.stringify(b);
+          })
+        )
+        .subscribe(profile => {
+          console.log('👤 User profile changed in header:', profile);
+          this.userProfile = profile;
+        })
+    );
+
+    // Alternative: Use combineLatest for better synchronization
+    this.authSubscription.add(
+      combineLatest([
+        this.authState.isLoggedIn$,
+        this.authState.userProfile$
+      ]).subscribe(([isLoggedIn, userProfile]) => {
+        console.log('🔄 Combined auth state update:', { isLoggedIn, userProfile });
+        this.isLoggedIn = isLoggedIn;
+        this.userProfile = userProfile;
       })
     );
   }
@@ -89,57 +135,54 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   // Login modal methods
   openLoginModal(registerMode = false) {
-    console.log('Opening login modal from header, register mode:', registerMode);
+    console.log('🔐 Opening login modal from header, register mode:', registerMode);
     this.isRegisterMode = registerMode;
     this.showLoginModal = true;
   }
 
   onLoginModalClose() {
-    console.log('Login modal closed');
+    console.log('❌ Login modal closed');
     this.showLoginModal = false;
     this.isRegisterMode = false;
   }
 
   onLoginSuccess() {
-    console.log('Login successful in header');
+    console.log('✅ Login successful in header');
     this.showLoginModal = false;
     this.isRegisterMode = false;
-    // The AuthStateService is already updated by the login modal
-    // Emit to parent component if needed for additional actions
+    this.loginSuccess.emit();
   }
 
-
   logout() {
-    console.log('Logout clicked');
-  
-    let refreshToken: string | null = null;
-    if (isPlatformBrowser(this.platformId)) {
-      refreshToken = localStorage.getItem('accessToken');
-    }
+    console.log('👋 Logout clicked');
   
     this.authService.logout().subscribe({
       next: () => {
+        console.log('✅ Server logout successful');
         this.authState.logout();
+        this.logoutClicked.emit();
         this.router.navigate(['/']);
       },
-      error: () => {
+      error: (err) => {
+        console.error('❌ Server logout failed:', err);
+        // Force logout on client even if server fails
+        this.authState.logout();
         if (isPlatformBrowser(this.platformId)) {
           localStorage.clear();
         }
+        this.logoutClicked.emit();
         this.router.navigate(['/']);
       }
     });
   }
-  
-  
 
   // Navigation methods
   onRegisterClick() {
-    this.router.navigate(['/register']);
+    this.router.navigate(['/auth/register']);
   }
 
   onLoginClick() {
-    this.openLoginModal(false); // Open modal in login mode
+    this.openLoginModal(false);
   }
 
   // Helper methods for template
@@ -154,5 +197,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const lastName = this.userProfile.lastName?.[0] || '';
     const username = this.userProfile.username?.[0] || '';
     return (firstName + lastName) || username || 'U';
+  }
+
+  // Debug method to manually refresh auth state
+  refreshAuth(): void {
+    console.log('🔄 Manually refreshing auth state...');
+    this.authState.refreshAuthState();
   }
 }

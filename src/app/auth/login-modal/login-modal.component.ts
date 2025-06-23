@@ -61,7 +61,7 @@ export class LoginModalComponent implements OnInit{
   }
 
   switchToForgotPassword() {
-    this.router.navigate(['/forgot-password']);
+    this.router.navigate(['/auth/forgot-password']);
     this.isForgotPasswordMode = true;
 
     this.resetForm();
@@ -322,7 +322,7 @@ export class LoginModalComponent implements OnInit{
 
   switchToRegister() {
     this.isOpen = false;
-    this.router.navigate(['/register']);
+    this.router.navigate(['/auth/register']);
   }
 
   switchToLogin() {

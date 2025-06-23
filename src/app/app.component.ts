@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { AuthStateService } from './services/auth-state/auth-state.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -20,7 +21,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private isBrowser: boolean;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object, private router: Router) {
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: Object, 
+    private router: Router,
+    private authState: AuthStateService
+  ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
   
@@ -32,6 +37,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     }
+    
   }
   
 

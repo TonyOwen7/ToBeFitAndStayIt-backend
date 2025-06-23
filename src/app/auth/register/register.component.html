@@ -282,7 +282,7 @@
                             <label class="checkbox-wrapper">
                                 <input type="checkbox" id="agreeTerms" name="agreeTerms" [(ngModel)]="agreeTerms" required>
                                 <span class="checkbox-label">
-                                    I agree to the <a href="#" class="link">Terms of Service</a> and <a href="#" class="link">Privacy Policy</a> *
+                                    I agree to the <a (click)="goToTermsPrivacy('terms')" class="link">Terms of Service</a> and <a (click)="goToTermsPrivacy('privacy')" class="link">Privacy Policy</a> *
                                 </span>
                             </label>
                         </div>

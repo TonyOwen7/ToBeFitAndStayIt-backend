@@ -13,7 +13,8 @@ import { Subscription } from 'rxjs';
 import { AuthStateService } from '../../services/auth-state/auth-state.service';
 import { CustomItemsService } from '../../services/custom-items/custom-items.service';
 import { LoginModalComponent } from '../../auth/login-modal/login-modal.component';
-import { Router } from  '@angular/router';;
+import { Router } from  '@angular/router';import { RegisterFormState } from '../../models/register-form-state.model';
+;
 
 interface WaterItem {
   id: number;

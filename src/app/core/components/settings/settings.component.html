@@ -1,0 +1,383 @@
+<!-- settings.component.html -->
+<div class="app-container">
+    <app-header></app-header>
+  
+    <main class="main-content">
+      <div class="settings-wrapper">
+        <div class="settings-container">
+          <!-- Header -->
+          <div class="settings-header">
+            <div class="header-glow"></div>
+            <div class="welcome-section">
+              <h2 class="settings-title">Account Settings</h2>
+              <p class="settings-subtitle">Manage your personal information and account</p>
+            </div>
+          </div>
+  
+          <!-- Success/Error Messages -->
+          <div class="success-message" *ngIf="showProfileSuccess">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            🎉 Profile updated successfully!
+          </div>
+  
+          <div class="success-message" *ngIf="showPasswordSuccess">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            🔑 Password changed successfully!
+          </div>
+  
+          <div class="error-message" *ngIf="showError">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+              <line x1="15" y1="9" x2="9" y2="15" stroke="currentColor" stroke-width="2"/>
+              <line x1="9" y1="9" x2="15" y2="15" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            {{ errorMessage }}
+          </div>
+  
+          <!-- Profile Form -->
+          <div class="settings-body">
+            <form class="settings-form" (ngSubmit)="updateProfile()" #profileForm="ngForm">
+              <h3 class="section-title">Personal Information</h3>
+  
+              <!-- Name Fields -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="firstName" class="form-label">
+                    <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/>
+                      <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    First Name *
+                  </label>
+                  <div class="input-wrapper">
+                    <input type="text" id="firstName" name="firstName" 
+                           class="form-input" placeholder="Enter your first name"
+                           [(ngModel)]="userProfile.firstName" required>
+                    <div class="input-border"></div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="lastName" class="form-label">
+                    <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/>
+                      <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Last Name *
+                  </label>
+                  <div class="input-wrapper">
+                    <input type="text" id="lastName" name="lastName" 
+                           class="form-input" placeholder="Enter your last name"
+                           [(ngModel)]="userProfile.lastName" required>
+                    <div class="input-border"></div>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Email Field -->
+              <div class="form-group">
+                <label for="email" class="form-label">
+                  <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2"/>
+                    <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  Email Address *
+                </label>
+                <div class="input-wrapper">
+                  <input type="email" id="email" name="email" 
+                         class="form-input" placeholder="Enter your email address"
+                         [(ngModel)]="userProfile.email" required disabled>
+                  <div class="input-border"></div>
+                </div>
+              </div>
+  
+              <!-- Age and Gender Row -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="age" class="form-label">
+                    <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                      <polyline points="12,6 12,12 16,14" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Age
+                  </label>
+                  <div class="input-wrapper">
+                    <input type="number" id="age" name="age" min="13" max="120"
+                           class="form-input" placeholder="Age"
+                           [(ngModel)]="userProfile.age">
+                    <div class="input-border"></div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="gender" class="form-label">
+                    <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/>
+                      <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Gender
+                  </label>
+                  <div class="input-wrapper">
+                    <select id="gender" name="gender" class="form-input" [(ngModel)]="userProfile.gender">
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                    </select>
+                    <div class="input-border"></div>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Weight and Height Row -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="weight" class="form-label">
+                    <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M3 6l3-3m0 0l3 3M6 6v14m12-14l3-3m0 0l-3-3m3 3v14" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Weight (kg)
+                  </label>
+                  <div class="input-wrapper">
+                    <input type="number" id="weight" name="weight" min="1" step="0.1"
+                           class="form-input" placeholder="Enter your weight"
+                           [(ngModel)]="userProfile.weight">
+                    <div class="input-border"></div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="height" class="form-label">
+                    <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 22v-2m0-16V2M8 5l4-3 4 3v14l-4 3-4-3V5z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Height (cm)
+                  </label>
+                  <div class="input-wrapper">
+                    <input type="number" id="height" name="height" min="1" step="0.1"
+                           class="form-input" placeholder="Enter your height"
+                           [(ngModel)]="userProfile.height">
+                    <div class="input-border"></div>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Activity Level and Health Goal Row -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="activityLevel" class="form-label">
+                    <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Activity Level
+                  </label>
+                  <div class="input-wrapper">
+                    <select id="activityLevel" name="activityLevel" class="form-input" [(ngModel)]="userProfile.activityLevel">
+                      <option value="">Select Activity Level</option>
+                      <option value="sedentary">Sedentary (little/no exercise)</option>
+                      <option value="light">Light (1-3 days/week)</option>
+                      <option value="moderate">Moderate (3-5 days/week)</option>
+                      <option value="active">Active (6-7 days/week)</option>
+                      <option value="very-active">Very Active (2x/day, intense)</option>
+                    </select>
+                    <div class="input-border"></div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="healthGoal" class="form-label">
+                    <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2"/>
+                      <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.51 0 2.93.37 4.18 1.03" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Primary Health Goal
+                  </label>
+                  <div class="input-wrapper">
+                    <select id="healthGoal" name="healthGoal" class="form-input" [(ngModel)]="userProfile.healthGoal">
+                      <option value="">Select Goal</option>
+                      <option value="weight-loss">Weight Loss</option>
+                      <option value="weight-gain">Weight Gain</option>
+                      <option value="maintain-weight">Maintain Weight</option>
+                      <option value="general-health">General Health</option>
+                    </select>
+                    <div class="input-border"></div>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Submit Button -->
+              <button type="submit" class="submit-btn" [disabled]="isUpdatingProfile || !profileForm.form.valid">
+                <span class="btn-content" *ngIf="!isUpdatingProfile">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  Update Profile
+                </span>
+                <div class="loading-spinner" *ngIf="isUpdatingProfile">
+                  <div class="spinner"></div>
+                  Updating...
+                </div>
+              </button>
+            </form>
+  
+            <!-- Password Change Form -->
+            <form class="settings-form" (ngSubmit)="changePassword()" #passwordForm="ngForm">
+              <h3 class="section-title">Change Password</h3>
+  
+              <div class="form-group">
+                <label for="currentPassword" class="form-label">
+                  <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  Current Password *
+                </label>
+                <div class="input-wrapper">
+                  <input type="{{ currentPasswordVisible ? 'text' : 'password' }}" id="currentPassword" name="currentPassword"
+                         class="form-input password-input" placeholder="Enter current password"
+                         [(ngModel)]="passwordData.current_password" required>
+                  <button type="button" class="password-toggle" (click)="toggleCurrentPasswordVisibility()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" *ngIf="!currentPasswordVisible">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" *ngIf="currentPasswordVisible">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2"/>
+                      <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                  </button>
+                  <div class="input-border"></div>
+                </div>
+              </div>
+  
+              <div class="form-group">
+                <label for="newPassword" class="form-label">
+                  <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  New Password *
+                </label>
+                <div class="input-wrapper">
+                  <input type="{{ newPasswordVisible ? 'text' : 'password' }}" id="newPassword" name="newPassword"
+                         class="form-input password-input" placeholder="Enter new password"
+                         [(ngModel)]="passwordData.new_password" required minlength="8">
+                  <button type="button" class="password-toggle" (click)="toggleNewPasswordVisibility()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" *ngIf="!newPasswordVisible">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" *ngIf="newPasswordVisible">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2"/>
+                      <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                  </button>
+                  <div class="input-border"></div>
+                </div>
+              </div>
+  
+              <div class="form-group">
+                <label for="confirmNewPassword" class="form-label">
+                  <svg class="label-icon" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  Confirm New Password *
+                </label>
+                <div class="input-wrapper">
+                  <input type="{{ confirmNewPasswordVisible ? 'text' : 'password' }}" id="confirmNewPassword" name="confirmNewPassword"
+                         class="form-input password-input" placeholder="Confirm new password"
+                         [(ngModel)]="passwordData.confirm_new_password" required minlength="8">
+                  <button type="button" class="password-toggle" (click)="toggleConfirmNewPasswordVisibility()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" *ngIf="!confirmNewPasswordVisible">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" *ngIf="confirmNewPasswordVisible">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" stroke-width="2"/>
+                      <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                  </button>
+                  <div class="input-border"></div>
+                </div>
+              </div>
+  
+              <!-- Submit Button -->
+              <button style="cursor: pointer;" type="submit" class="submit-btn" [disabled]="isChangingPassword || !passwordForm.form.valid">
+                <span class="btn-content" *ngIf="!isChangingPassword">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M17 21v-8a1 1 0 00-1-1H8a1 1 0 00-1 1v8" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  Change Password
+                </span>
+                <div class="loading-spinner" *ngIf="isChangingPassword">
+                  <div class="spinner"></div>
+                  Updating...
+                </div>
+              </button>
+            </form>
+  
+            <!-- Delete Account Section -->
+            <div class="delete-section">
+              <h3 class="section-title">Danger Zone</h3>
+              <div class="warning-box">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke="#dc3545" stroke-width="2"/>
+                </svg>
+                <p>Deleting your account is permanent and cannot be undone. All your data will be permanently removed from our systems.</p>
+              </div>
+              <button class="delete-btn" (click)="confirmDeleteAccount()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                Delete My Account
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" *ngIf="showDeleteModal">
+      <div class="delete-modal">
+        <div class="modal-header">
+          <h3>Confirm Account Deletion</h3>
+          <button (click)="showDeleteModal = false">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to permanently delete your account? This action cannot be undone.</p>
+          <p>To confirm, please enter your password:</p>
+          
+          <div class="form-group">
+            <div class="input-wrapper">
+              <input type="password" placeholder="Enter your password" 
+                     [(ngModel)]="deletePassword" class="form-input">
+              <div class="input-border"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="cancel-btn" (click)="showDeleteModal = false">Cancel</button>
+          <button class="confirm-delete-btn" 
+                  (click)="deleteAccount()"
+                  [disabled]="!deletePassword || isDeletingAccount">
+            <span *ngIf="!isDeletingAccount">Delete Account</span>
+            <div class="loading-spinner" *ngIf="isDeletingAccount">
+              <div class="spinner"></div>
+              Deleting...
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <app-footer></app-footer>
+  </div>

@@ -1,0 +1,309 @@
+<!-- terms-privacy.component.html -->
+<div class="app-container">
+    <button class="back-button" (click)="goBack()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back to Registration
+    </button>
+
+    <div class="page-header">
+        <h1>Legal Information</h1>
+        <p>Terms of Service & Privacy Policy for ToBeFitAndStayIt</p>
+    </div>
+
+    <div class="navigation-tabs">
+        <button 
+            class="nav-tab" 
+            [class.active]="activeTab === 'terms'"
+            (click)="showSection('terms')"
+        >
+            Terms of Service
+        </button>
+        <button 
+            class="nav-tab" 
+            [class.active]="activeTab === 'privacy'"
+            (click)="showSection('privacy')"
+        >
+            Privacy Policy
+        </button>
+    </div>
+
+    <!-- Terms of Service Section -->
+    <div id="terms" class="content-section" [class.active]="activeTab === 'terms'">
+        <h2 class="section-title">
+            <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/>
+                <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2"/>
+                <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2"/>
+                <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Terms of Service
+        </h2>
+
+        <div class="subsection">
+            <p><strong>Last Updated:</strong> June 23, 2025</p>
+            <p>Welcome to ToBeFitAndStayIt! These Terms of Service ("Terms") govern your use of our wellness tracking platform and related services. By creating an account or using our services, you agree to these Terms.</p>
+        </div>
+
+        <div class="subsection">
+            <h3>1. About ToBeFitAndStayIt</h3>
+            <p>ToBeFitAndStayIt is a comprehensive wellness platform that helps you track and optimize four fundamental pillars of health:</p>
+            <ul>
+                <li><strong>Metabolism Tracking:</strong> Understanding your Basal Metabolic Rate (BMR) and caloric needs</li>
+                <li><strong>Hydration Monitoring:</strong> Daily water intake tracking and optimization</li>
+                <li><strong>Sleep Analysis:</strong> Sleep pattern tracking and quality assessment</li>
+                <li><strong>Nutrition Management:</strong> Comprehensive nutritional tracking and meal planning</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>2. Account Registration and Eligibility</h3>
+            <p>To use ToBeFitAndStayIt, you must:</p>
+            <ul>
+                <li>Be at least 13 years of age</li>
+                <li>Provide accurate, complete, and current information during registration</li>
+                <li>Maintain the security of your account credentials</li>
+                <li>Accept responsibility for all activities under your account</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>3. Health and Wellness Disclaimer</h3>
+            <div class="highlight-box">
+                <h4>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Important Health Notice
+                </h4>
+                <p>ToBeFitAndStayIt provides wellness tracking tools and educational information. Our services are NOT intended to replace professional medical advice, diagnosis, or treatment. Always consult qualified healthcare professionals for medical concerns.</p>
+                <p style="font-weight: 700;"> <i>While ToBeFitAndStayIt aims to support your journey toward a healthier lifestyle, it is not a substitute for medical evaluation or professional care. In serious or emergency situations, a qualified doctor’s opinion is essential and should always take precedence. Our platform provides general wellness guidance, but individual diagnoses and treatment decisions must be made by licensed healthcare providers.</i></p>
+            </div>
+            <p>You acknowledge that:</p>
+            <ul>
+                <li>Wellness tracking is for informational purposes only</li>
+                <li>Individual health needs vary significantly</li>
+                <li>You should consult healthcare providers before making significant lifestyle changes</li>
+                <li>Emergency medical situations require immediate professional care</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>4. Acceptable Use</h3>
+            <p>You agree to use ToBeFitAndStayIt responsibly and lawfully. You may NOT:</p>
+            <ul>
+                <li>Share false or misleading health information</li>
+                <li>Attempt to access other users' private data</li>
+                <li>Use automated systems to collect data from our platform</li>
+                <li>Interfere with the security or functionality of our services</li>
+                <li>Violate any applicable laws or regulations</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>5. Your Data and Content</h3>
+            <p>When you use ToBeFitAndStayIt, you retain ownership of your personal wellness data. However, you grant us necessary rights to:</p>
+            <ul>
+                <li>Process and analyze your data to provide tracking services</li>
+                <li>Generate personalized recommendations and insights</li>
+                <li>Improve our platform's functionality and accuracy</li>
+                <li>Ensure data security and platform integrity</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>6. Service Availability</h3>
+            <p>While we strive for continuous service availability, ToBeFitAndStayIt may experience:</p>
+            <ul>
+                <li>Scheduled maintenance periods</li>
+                <li>Temporary technical disruptions</li>
+                <li>Updates and feature improvements</li>
+            </ul>
+            <p>We currently operate as a web-based platform and do not offer mobile applications.</p>
+        </div>
+
+        <div class="subsection">
+            <h3>7. Limitation of Liability</h3>
+            <p>ToBeFitAndStayIt and its operators shall not be liable for:</p>
+            <ul>
+                <li>Health decisions made based on tracking data</li>
+                <li>Temporary service interruptions</li>
+                <li>Data loss due to technical issues</li>
+                <li>Indirect or consequential damages</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>8. Modifications to Terms</h3>
+            <p>We may update these Terms periodically. Significant changes will be communicated through:</p>
+            <ul>
+                <li>Email notifications to registered users</li>
+                <li>Prominent notices on our platform</li>
+                <li>Updated "Last Modified" dates</li>
+            </ul>
+            <p>Continued use after changes constitutes acceptance of new Terms.</p>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Section -->
+    <div id="privacy" class="content-section" [class.active]="activeTab === 'privacy'">
+        <h2 class="section-title">
+            <svg class="section-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            Privacy Policy
+        </h2>
+
+        <div class="subsection">
+            <p><strong>Last Updated:</strong> June 23, 2025</p>
+            <p>Your privacy is fundamental to ToBeFitAndStayIt. This Privacy Policy explains how we collect, use, protect, and share your information when you use our wellness tracking platform.</p>
+        </div>
+
+        <div class="subsection">
+            <h3>1. Information We Collect</h3>
+            
+            <h4>Personal Information:</h4>
+            <ul>
+                <li><strong>Account Data:</strong> Name, email address, age, gender</li>
+                <li><strong>Physical Metrics:</strong> Weight, height, activity level</li>
+                <li><strong>Health Goals:</strong> Primary wellness objectives and preferences</li>
+                <li><strong>Environmental Data:</strong> Climate preferences for personalized recommendations</li>
+            </ul>
+
+            <h4>Wellness Tracking Data:</h4>
+            <ul>
+                <li><strong>Hydration Records:</strong> Daily water intake and hydration goals</li>
+                <li><strong>Sleep Patterns:</strong> Sleep duration, quality scores, and rest cycles</li>
+                <li><strong>Nutritional Information:</strong> Caloric intake, macronutrients, meal data</li>
+                <li><strong>Metabolic Calculations:</strong> BMR estimates and energy expenditure</li>
+            </ul>
+
+            <h4>Technical Information:</h4>
+            <ul>
+                <li>Device and browser information</li>
+                <li>IP address and general location data</li>
+                <li>Platform usage patterns and preferences</li>
+                <li>Error logs and performance metrics</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>2. How We Use Your Information</h3>
+            
+            <div class="highlight-box">
+                <h4>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 11l3 3L22 4" stroke="currentColor" stroke-width="2"/>
+                        <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.51 0 2.93.37 4.18 1.03" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Primary Purpose: Your Wellness Journey
+                </h4>
+                <p>Your data powers personalized tracking, insights, and recommendations to support your health goals across hydration, sleep, nutrition, and metabolism.</p>
+            </div>
+
+            <p>Specifically, we use your information to:</p>
+            <ul>
+                <li><strong>Personalized Tracking:</strong> Calculate BMR, set appropriate goals, and track progress</li>
+                <li><strong>Health Insights:</strong> Generate recommendations based on your patterns and preferences</li>
+                <li><strong>Platform Improvement:</strong> Enhance features and develop new wellness tools</li>
+                <li><strong>Account Management:</strong> Provide support and maintain service functionality</li>
+                <li><strong>Communication:</strong> Send important updates and wellness tips (with your consent)</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>3. Data Protection and Security</h3>
+            <p>We implement comprehensive security measures to protect your wellness data:</p>
+            <ul>
+                <li><strong>Encryption:</strong> Data is encrypted in transit and at rest</li>
+                <li><strong>Access Controls:</strong> Strict employee access limitations</li>
+                <li><strong>Regular Audits:</strong> Continuous security monitoring and updates</li>
+                <li><strong>Secure Infrastructure:</strong> Industry-standard hosting and backup systems</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>4. Information Sharing</h3>
+            <p>ToBeFitAndStayIt does NOT sell your personal data. Limited sharing occurs only for:</p>
+            <ul>
+                <li><strong>Service Providers:</strong> Trusted partners who help operate our platform (under strict data agreements)</li>
+                <li><strong>Legal Requirements:</strong> When required by law or to protect rights and safety</li>
+                <li><strong>Business Transfers:</strong> In the event of company merger or acquisition (with notice to users)</li>
+            </ul>
+
+            <div class="highlight-box">
+                <h4>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Your Data Stays Private
+                </h4>
+                <p>Your wellness data is never shared with advertisers, insurance companies, or other third parties for marketing purposes.</p>
+            </div>
+        </div>
+
+        <div class="subsection">
+            <h3>5. Your Privacy Rights</h3>
+            <p>You have the following rights regarding your personal information:</p>
+            <ul>
+                <li><strong>Access:</strong> Request copies of your personal data</li>
+                <li><strong>Correction:</strong> Update or correct inaccurate information</li>
+                <li><strong>Deletion:</strong> Request removal of your data (subject to legal requirements)</li>
+                <li><strong>Portability:</strong> Export your wellness data in standard formats</li>
+                <li><strong>Opt-out:</strong> Unsubscribe from promotional communications</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>6. Data Retention</h3>
+            <p>We retain your information:</p>
+            <ul>
+                <li><strong>Active Accounts:</strong> As long as your account remains active</li>
+                <li><strong>Closed Accounts:</strong> Up to 2 years for legal and operational purposes</li>
+                <li><strong>Wellness Data:</strong> Until deletion is requested or account closure</li>
+                <li><strong>Legal Requirements:</strong> As required by applicable laws</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>7. Children's Privacy</h3>
+            <p>ToBeFitAndStayIt welcomes users aged 13 and above. For users under 18:</p>
+            <ul>
+                <li>Parental guidance is encouraged for wellness tracking</li>
+                <li>Additional privacy protections apply to minors' data</li>
+                <li>Parents can request access to or deletion of their child's information</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>8. International Users</h3>
+            <p>ToBeFitAndStayIt serves users globally. If you're outside your local jurisdiction:</p>
+            <ul>
+                <li>Your data may be processed in different countries</li>
+                <li>We comply with applicable international privacy laws</li>
+                <li>Appropriate safeguards protect cross-border data transfers</li>
+            </ul>
+        </div>
+
+        <div class="subsection">
+            <h3>9. Policy Updates</h3>
+            <p>We may update this Privacy Policy to reflect:</p>
+            <ul>
+                <li>New features or services</li>
+                <li>Changes in privacy laws</li>
+                <li>Improved data protection measures</li>
+            </ul>
+            <p>Significant changes will be communicated with advance notice.</p>
+        </div>
+    </div>
+
+    <div class="contact-info">
+        <h3>Questions or Concerns?</h3>
+        <p>For questions about these Terms or Privacy Policy, or to exercise your privacy rights:</p>
+        <a href="mailto:moubouyitony@gmail.com" class="contact-email">moubouyitony&#64;gmail.com</a>
+        <p class="response-time">
+            We're committed to your privacy and will respond to inquiries within 48 hours.
+        </p>
+    </div>
+</div>

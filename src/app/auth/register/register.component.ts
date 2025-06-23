@@ -8,15 +8,21 @@ import { AuthService } from '../../services/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { AuthStateService } from '../../services/auth-state/auth-state.service';
 import { HttpClient } from '@angular/common/http';
+import { RegisterFormService } from '../../services/regiser-form/register-form.service';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
+import { RegisterFormState } from '../../models/register-form-state.model';
 
 @Component({
   selector: 'app-register',
-  standalone: true,
-  imports: [HeaderComponent, FooterComponent, CommonModule, FormsModule, LoginModalComponent],
+  imports: [ReactiveFormsModule, HeaderComponent, FooterComponent, CommonModule, FormsModule, LoginModalComponent],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
+// models/register-form-state.model.ts
+
+
 export class RegisterComponent implements OnInit {
+  
   @Input() isLoggedIn: boolean = false;
   @Input() title: string = "ToBeFitAndStayIt";
   @Input() subtitle: string = "Your Complete Wellness Journey";
@@ -27,7 +33,6 @@ export class RegisterComponent implements OnInit {
 
   @Output() loginSuccess = new EventEmitter<void>();
   @Output() logoutClicked = new EventEmitter<void>();
-
   // Form fields - fixed to match backend expectations
   firstName: string = '';
   lastName: string = '';
@@ -58,16 +63,65 @@ export class RegisterComponent implements OnInit {
   calculatedBMR: number = 0;
   calculatedTDEE: number = 0;
 
+  
+
+  formState: RegisterFormState = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    username: '',
+    age: null,
+    gender: '',
+    password: '',
+    confirmPassword: '',
+    activityLevel: '',
+    healthGoal: '',
+    climate: '',
+    weight: null,
+    height: null,
+    agreeTerms: false,
+    passwordVisible: false,
+    confirmPasswordVisible: false,
+    errorMessage: ''
+  };
+
   constructor(
-    private http : HttpClient,
     private authService: AuthService,
     private authState: AuthStateService,
-    private router: Router
+    private router: Router,
+    // private form : FormGroup,
+    private registerFormService: RegisterFormService // Assuming registerService is the same as authService
   ) { }
 
   ngOnInit(): void {
-    // Initialize component
+    const restored = history.state?.formState as RegisterFormState | undefined;
+  
+    if (restored) {
+      console.log('Restoring form state in register:', restored);
+      this.restoreFormState(restored);
+    }
   }
+  private restoreFormState(state: RegisterFormState): void {
+    this.firstName = state.firstName ?? '';
+    this.lastName = state.lastName ?? '';
+    this.email = state.email ?? '';
+    this.username = state.username ?? '';
+    this.age = state.age ?? null;
+    this.gender = state.gender ?? '';
+    this.password = state.password ?? '';
+    this.confirmPassword = state.confirmPassword ?? '';
+    this.activityLevel = state.activityLevel ?? '';
+    this.healthGoal = state.healthGoal ?? '';
+    this.climate = state.climate ?? '';
+    this.weight = state.weight ?? null;
+    this.height = state.height ?? null;
+    this.agreeTerms = state.agreeTerms ?? false;
+    this.passwordVisible = state.passwordVisible ?? false;
+    this.confirmPasswordVisible = state.confirmPasswordVisible ?? false;
+    this.errorMessage = state.errorMessage ?? '';
+  }
+  
+  
 
   onSubmit(form?: any): void {
     const isFormValid = form ? form.valid : this.isFormValid();
@@ -325,6 +379,28 @@ export class RegisterComponent implements OnInit {
     );
   }
 
+  private getCurrentFormState(): RegisterFormState {
+    return {
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      username: this.username,
+      age: this.age,
+      gender: this.gender,
+      password: this.password,
+      confirmPassword: this.confirmPassword,
+      activityLevel: this.activityLevel,
+      healthGoal: this.healthGoal,
+      climate: this.climate,
+      weight: this.weight,
+      height: this.height,
+      agreeTerms: this.agreeTerms,
+      passwordVisible: this.passwordVisible,
+      confirmPasswordVisible: this.confirmPasswordVisible,
+      errorMessage: this.errorMessage
+    };
+  }  
+
   private resetForm(): void {
     this.firstName = '';
     this.lastName = '';
@@ -345,4 +421,30 @@ export class RegisterComponent implements OnInit {
     this.confirmPasswordVisible = false;
     this.errorMessage = '';
   }
+
+  goToTermsPrivacy(tab: 'terms' | 'privacy' = 'terms'): void {
+    const currentState = this.getCurrentFormState();
+  
+    if (currentState) {
+      this.formState = currentState;
+  
+      // 💾 Store the form state in the shared service
+      this.registerFormService.setFormState(this.formState);
+      console.log('🔁 Updated form state in service:', this.formState);
+      // 🗂️ Set the active tab in the servic
+      console.log('Setting active tab to:', tab);
+      this.registerFormService.setTab(tab);
+
+      console.log('🚀 Navigating to Terms & Privacy with form state:', this.formState);
+  
+      this.router.navigate(['/terms-privacy']);
+    } else {
+      console.warn('⚠️ No form state to pass to terms-privacy page.');
+      this.router.navigate(['/terms-privacy'], { fragment: tab });
+    }
+  }
+  
+  
+  
+  
 }

@@ -198,10 +198,10 @@
 
           <!-- Remember Me & Forgot Password (only show in login mode) -->
           <div class="form-options" *ngIf="!isRegisterMode">
-            <label class="checkbox-wrapper" style="opacity: 0;">
+            <!-- <label class="checkbox-wrapper" style="opacity: 0;">
               <input type="checkbox" id="rememberMe" name="rememberMe" [(ngModel)]="rememberMe" >
               <span class="checkbox-label">Remember me</span>
-            </label>
+            </label> -->
             <button type="button" class="forgot-password" (click)="switchToForgotPassword()">Forgot password?</button>
           </div>
 
