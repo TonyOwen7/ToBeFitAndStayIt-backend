@@ -14,7 +14,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 'full_name',
             'age', 'gender', 'weight', 'height', 'activity_level', 'health_goal',
-            'wants_newsletter', 'date_joined', 'bmi', 'bmr', 'tdee'
+            # 'wants_newsletter', 
+            'date_joined', 'bmi', 'bmr', 'tdee'
         ]
 
     def get_full_name(self, obj):
@@ -49,7 +50,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['email', 'first_name', 'last_name', 'age', 'gender', 'weight', 'height', 'activity_level', 'health_goal', 'wants_newsletter']
+        fields = ['email', 'first_name', 'last_name', 'age', 'gender', 'weight', 'height', 'activity_level', 'health_goal',
+                #    'wants_newsletter'
+                   ]
 
 class PasswordChangeSerializer(serializers.Serializer):
     current_password = serializers.CharField(write_only=True)

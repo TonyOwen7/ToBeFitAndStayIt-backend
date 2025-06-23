@@ -6,7 +6,7 @@ from .models import CustomUser
 class CustomUserAdmin(UserAdmin):
     # Fields to display in the admin list view
     list_display = ('email', 'username', 'first_name', 'last_name', 'age', 'gender', 'is_active', 'date_joined')
-    list_filter = ('gender', 'activity_level', 'health_goal', 'wants_newsletter', 'is_active', 'date_joined')
+    list_filter = ('gender', 'activity_level', 'climate','health_goal', 'is_active', 'date_joined')
     search_fields = ('email', 'username', 'first_name', 'last_name')
     ordering = ('-date_joined',)
     
@@ -15,7 +15,7 @@ class CustomUserAdmin(UserAdmin):
         (None, {'fields': ('username', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'email')}),
         ('Health & Fitness', {'fields': ('age', 'gender', 'weight', 'height', 'activity_level', 'health_goal')}),
-        ('Preferences', {'fields': ('wants_newsletter',)}),
+        # ('Preferences', {'fields': ('wants_newsletter',)}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )

@@ -66,14 +66,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # if using JWT
+        'rest_framework.authentication.TokenAuthentication',  # if using DRF token
+        'rest_framework.authentication.SessionAuthentication',  # if using sessions/cookies
     ),
+    
 }
+
 
 
 ROOT_URLCONF = 'wellness_core.urls'

@@ -16,7 +16,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             'username', 'email', 'password', 'confirm_password',
             'first_name', 'last_name',
             'age', 'gender', 'weight', 'height',
-            'activity_level', 'health_goal', 'wants_newsletter'
+            'activity_level', 'climate' ,'health_goal',
         ]
         extra_kwargs = {
             'password': {'write_only': True},
@@ -80,3 +80,33 @@ class LoginSerializer(serializers.Serializer):
         
         attrs['user'] = user
         return attrs
+
+from rest_framework import serializers
+from .models import CustomUser
+from rest_framework import serializers
+from .models import CustomUser
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    firstName = serializers.CharField(source='first_name', required=False)
+    lastName = serializers.CharField(source='last_name', required=False)
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'id', 'username', 'email', 'firstName', 'lastName',
+            'weight', 'gender', 'age', 'height',
+            'activity_level', 'climate', 'health_goal'
+        ]
+        read_only_fields = ['id', 'username', 'email']
+
+    def update(self, instance, validated_data):
+        user_fields = validated_data.pop('first_name', None), validated_data.pop('last_name', None)
+        if user_fields[0] is not None:
+            instance.first_name = user_fields[0]
+        if user_fields[1] is not None:
+            instance.last_name = user_fields[1]
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

@@ -27,6 +27,14 @@ class CustomUser(AbstractUser):
     ]
     activity_level = models.CharField(max_length=15, choices=ACTIVITY_LEVEL_CHOICES, blank=True)
     
+    CLIMATE_CHOICES = [
+    ('normal', 'Normal'),
+    ('hot', 'Hot/Humid'),
+    ('cold', 'Cold'),
+    ]
+
+    climate = models.CharField(max_length=10, choices=CLIMATE_CHOICES, blank=True)
+
     HEALTH_GOAL_CHOICES = [
         ('weight-loss', 'Lose Weight'),
         ('maintain-weight', 'Maintain Weight'),
@@ -34,9 +42,7 @@ class CustomUser(AbstractUser):
         ('general-health', 'General-health'),
    ]
     health_goal = models.CharField(max_length=20, choices=HEALTH_GOAL_CHOICES, blank=True)
-    
-    wants_newsletter = models.BooleanField(default=False)
-    
+        
     # Use email as the username field
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']

@@ -38,7 +38,7 @@ class RegisterView(APIView):
                         "height": user.height,
                         "activity_level": user.activity_level,
                         "health_goal": user.health_goal,
-                        "wants_newsletter": user.wants_newsletter,
+                        # "wants_newsletter": user.wants_newsletter,
                     }
                 }
                 
@@ -79,7 +79,7 @@ class LoginView(APIView):
                     'height': user.height,
                     'activity_level': user.activity_level,
                     'health_goal': user.health_goal,
-                    'wants_newsletter': user.wants_newsletter,
+                    # 'wants_newsletter': user.wants_newsletter,
                 }
             }
             
@@ -220,3 +220,24 @@ class PasswordResetConfirmView(APIView):
                 'last_name': user.last_name,
             }
         }, status=status.HTTP_200_OK)
+
+
+from .serializers import UserProfileSerializer
+from .serializers import UserProfileSerializer
+
+class UserProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        serializer = UserProfileSerializer(
+            request.user, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
