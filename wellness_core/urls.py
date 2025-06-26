@@ -7,4 +7,6 @@ urlpatterns = [
     path('api/app-interest/', include('app_interest.urls')),
     path('api/settings/', include('settings.urls')),
     path('api/foods-and-drinks/', include('foods_and_drinks.urls')),
+    path('api/wellness-tips/', include('wellness_tips.urls')),
+    path('api/users/', include('users.urls')),
 ]

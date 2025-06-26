@@ -19,12 +19,13 @@ class CustomUser(AbstractUser):
     height = models.FloatField(null=True, blank=True, help_text="Height in cm")
     
     ACTIVITY_LEVEL_CHOICES = [
-        ('sedentary', 'Sedentary'),
-        ('light', 'Light Activity'),
-        ('moderate', 'Moderate Activity'),
-        ('active', 'Very Active'),
-        ('very-active', 'Extremely Active'),
+        ('sedentary', 'Sedentary (little/no exercise)'),
+        ('light', 'Light (1-3 days/week)'),
+        ('moderate', 'Moderate (3-5 days/week)'),
+        ('active', 'Active (6-7 days/week)'),
+        ('very-active', 'Very Active (2x/day, intense)'),
     ]
+
     activity_level = models.CharField(max_length=15, choices=ACTIVITY_LEVEL_CHOICES, blank=True)
     
     CLIMATE_CHOICES = [

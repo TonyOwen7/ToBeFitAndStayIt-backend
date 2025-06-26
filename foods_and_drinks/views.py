@@ -2,6 +2,7 @@ from rest_framework import generics
 from .models import Food, Drink
 from .serializers import FoodSerializer, DrinkSerializer
 
+
 # FOOD VIEWS
 class FoodListAPIView(generics.ListAPIView):
     queryset = Food.objects.all()

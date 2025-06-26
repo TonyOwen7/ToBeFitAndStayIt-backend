@@ -241,3 +241,32 @@ class UserProfileAPIView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.contrib.auth.tokens import default_token_generator
+
+class DeleteAccountView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        current_password = request.data.get("current_password")
+        uidb64 = request.data.get("uid")
+        token = request.data.get("token")
+
+        if not current_password or not uidb64 or not token:
+            return Response({"message": "Missing parameters"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (User.DoesNotExist, ValueError, TypeError):
+            return Response({"message": "Invalid user identifier"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not default_token_generator.check_token(user, token):
+            return Response({"message": "Token is invalid or expired"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not check_password(current_password, user.password):
+            return Response({"message": "Incorrect password"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.delete()
+        return Response({"message": "Account deleted successfully"}, status=status.HTTP_200_OK)
