@@ -1,3 +1,4 @@
+# models.py
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -39,7 +40,6 @@ class Food(models.Model):
     def fats_per_mass(self):
         return self.fats_per_gram * self.mass
 
-
 class Drink(models.Model):
     user = models.ForeignKey(
         User,
@@ -56,11 +56,11 @@ class Drink(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.user.email if self.user else 'Global'})"
-    
+
     @property
     def calories_per_volume(self):
         return self.calories_per_ml * self.volume
-    
+
     @property
     def sugar_per_volume(self):
         return self.sugar_per_ml * self.volume
