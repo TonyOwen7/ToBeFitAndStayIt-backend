@@ -110,3 +110,52 @@ class UserProfileSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+
+# serializers.py
+from rest_framework import serializers
+from .models import CustomUser, DailyNutrition, DailySleep, DailyHydration
+
+class CustomUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'email', 'first_name', 'last_name', 'age', 'gender', 
+                 'weight', 'height', 'activity_level', 'climate', 'health_goal']
+        read_only_fields = ['id']
+
+class DailyNutritionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailyNutrition
+        fields = ['id', 'user', 'date', 'kcal', 'protein', 'carbs', 'fats']
+        read_only_fields = ['user']
+
+class DailySleepSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailySleep
+        fields = ['id', 'user', 'date', 'time_slept']
+        read_only_fields = ['user']
+
+class DailyHydrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailyHydration
+        fields = ['id', 'user', 'date', 'water_intake']
+        read_only_fields = ['user']
+
+class DashboardSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    nutrition = DailyNutritionSerializer(required=False)
+    sleep = DailySleepSerializer(required=False)
+    hydration = DailyHydrationSerializer(required=False)
+    
+    # Recommended values
+    recommended_kcal = serializers.IntegerField(required=False)
+    recommended_protein = serializers.FloatField(required=False)
+    recommended_water = serializers.FloatField(required=False)
+    recommended_sleep = serializers.FloatField(default=8.0)
+    
+    # Status indicators
+    nutrition_status = serializers.CharField(required=False)
+    sleep_status = serializers.CharField(required=False)
+    hydration_status = serializers.CharField(required=False)
+    
+    # Yesterday comparison
+    yesterday_comparison = serializers.DictField(required=False)

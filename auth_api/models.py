@@ -65,3 +65,30 @@ class PasswordHistory(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+class DailyNutrition(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    date = models.DateField()
+    kcal = models.PositiveIntegerField()
+    protein = models.FloatField()  # grams
+    carbs = models.FloatField()    # grams
+    fats = models.FloatField()     # grams
+
+    class Meta:
+        unique_together = ['user', 'date']
+
+class DailySleep(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    date = models.DateField()
+    time_slept = models.FloatField(help_text="Hours slept")
+
+    class Meta:
+        unique_together = ['user', 'date']
+
+class DailyHydration(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    date = models.DateField()
+    water_intake = models.FloatField(help_text="Liters")
+
+    class Meta:
+        unique_together = ['user', 'date']

@@ -29,3 +29,28 @@ class CustomUserAdmin(UserAdmin):
         ('Personal info', {'fields': ('first_name', 'last_name')}),
         ('Health & Fitness', {'fields': ('age', 'gender', 'weight', 'height', 'activity_level', 'health_goal')}),
     )
+
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from .models import CustomUser, DailyNutrition, DailySleep, DailyHydration
+
+@admin.register(DailyNutrition)
+class DailyNutritionAdmin(admin.ModelAdmin):
+    list_display = ['user', 'date', 'kcal', 'protein', 'carbs', 'fats']
+    list_filter = ['date', 'user__gender', 'user__activity_level']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name']
+    date_hierarchy = 'date'
+
+@admin.register(DailySleep)
+class DailySleepAdmin(admin.ModelAdmin):
+    list_display = ['user', 'date', 'time_slept']
+    list_filter = ['date', 'user__gender', 'user__activity_level']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name']
+    date_hierarchy = 'date'
+
+@admin.register(DailyHydration)
+class DailyHydrationAdmin(admin.ModelAdmin):
+    list_display = ['user', 'date', 'water_intake']
+    list_filter = ['date', 'user__gender', 'user__activity_level']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name']
+    date_hierarchy = 'date'
