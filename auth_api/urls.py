@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import RegisterView, LoginView, LogoutView, PasswordResetRequestView, PasswordResetConfirmView, UserProfileAPIView, DeleteAccountView
+from .views import RegisterView, LoginView, LogoutView, PasswordResetRequestView, PasswordResetConfirmView, UserProfileAPIView, DeleteAccountView, DataRetentionLog, DataRetentionStatusView, ExtendRetentionView
 from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 from . import views
@@ -19,5 +19,8 @@ urlpatterns = [
     path('reset-password/', PasswordResetConfirmView.as_view()), 
     path('user/profile/', UserProfileAPIView.as_view(), name='user-profile'),
     path('user/delete-account/', DeleteAccountView.as_view(), name='delete-account'),
+    path('retention-status/', DataRetentionStatusView.as_view(), name='retention-status'),
+    path('extend-retention/', ExtendRetentionView.as_view(), name='extend-retention'),
+
 ]
 

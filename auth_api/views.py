@@ -617,3 +617,96 @@ class DashboardViewSet(viewsets.ViewSet):
             'end_date': end_date,
             'data': data
         })
+    
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from .models import DataRetentionLog
+
+User = get_user_model()
+
+class DataRetentionStatusView(APIView):
+    """Get user's data retention status"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        
+        if user.is_data_anonymized:
+            return Response({
+                'status': 'anonymized',
+                'message': 'Your account data has been anonymized for privacy protection.'
+            })
+        
+        days_inactive = user.days_since_last_activity()
+        
+        # Determine status
+        if days_inactive < 150:  # Less than 5 months
+            status_info = {
+                'status': 'active',
+                'days_inactive': days_inactive,
+                'message': 'Your account is active.',
+                'next_warning_in_days': 150 - days_inactive
+            }
+        elif days_inactive < 180:  # 5-6 months
+            status_info = {
+                'status': 'warning_period',
+                'days_inactive': days_inactive,
+                'message': 'You will receive a retention warning soon.',
+                'warning_sent': user.retention_notification_sent is not None,
+                'final_notice_in_days': 180 - days_inactive
+            }
+        elif days_inactive < 210:  # 6-7 months
+            status_info = {
+                'status': 'grace_period',
+                'days_inactive': days_inactive,
+                'message': 'Your account is in the final grace period.',
+                'anonymization_scheduled': user.data_anonymization_scheduled,
+                'days_until_anonymization': (user.data_anonymization_scheduled - timezone.now()).days if user.data_anonymization_scheduled else None
+            }
+        else:  # Over 7 months
+            status_info = {
+                'status': 'scheduled_for_anonymization',
+                'days_inactive': days_inactive,
+                'message': 'Your account is scheduled for data anonymization.',
+                'anonymization_scheduled': user.data_anonymization_scheduled
+            }
+        
+        return Response(status_info)
+
+class ExtendRetentionView(APIView):
+    """Allow user to extend their retention period"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        user = request.user
+        
+        if user.is_data_anonymized:
+            return Response(
+                {'error': 'Cannot extend retention for anonymized accounts'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Reset retention fields
+        user.last_activity = timezone.now()
+        user.retention_notification_sent = None
+        user.data_anonymization_scheduled = None
+        user.retention_warnings_count = 0
+        user.save()
+        
+        # Log the extension
+        DataRetentionLog.objects.create(
+            user=user,
+            action='retention_extended',
+            details='User manually extended retention period',
+            days_inactive=0
+        )
+        
+        return Response({
+            'message': 'Retention period extended successfully',
+            'new_last_activity': user.last_activity
+        })

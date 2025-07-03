@@ -71,6 +71,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'auth_api.middleware.UserActivityMiddleware',  # Add this
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -183,12 +184,33 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
+        'retention_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'data_retention.log',
+        },
+    },
+    'loggers': {
+        'auth_api.management.commands.process_inactive_users': {
+            'handlers': ['retention_file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     },
     'root': {
         'handlers': ['console'],
         'level': 'INFO',
     },
 }
+
+# Data retention settings
+DATA_RETENTION_SETTINGS = {
+    'INACTIVE_WARNING_DAYS': 150,  # 5 months
+    'INACTIVE_FINAL_NOTICE_DAYS': 180,  # 6 months
+    'ANONYMIZATION_GRACE_DAYS': 30,  # 30 days after final notice
+    'TOTAL_RETENTION_DAYS': 210,  # 7 months total
+}
+
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
