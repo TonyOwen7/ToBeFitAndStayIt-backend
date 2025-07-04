@@ -1,6 +1,7 @@
+# urls.py
 from django.urls import path
-from .views import AnswerFromWebView
+from .views import WellnessTipView
 
 urlpatterns = [
-    path('ask/', AnswerFromWebView.as_view(), name='ask-question'),
+    path('', WellnessTipView.as_view(), name='wellness-tip'),
 ]
