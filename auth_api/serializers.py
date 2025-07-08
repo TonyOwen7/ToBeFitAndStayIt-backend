@@ -110,6 +110,19 @@ class UserProfileSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+    
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        # Return both access and new refresh (if rotation)
+        if self.context.get("request"):
+            refresh_token = self.context["request"].data.get("refresh")
+            if refresh_token:
+                data["refresh"] = refresh_token
+        return data
+
 
 # serializers.py
 from rest_framework import serializers

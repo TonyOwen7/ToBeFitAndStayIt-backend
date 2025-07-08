@@ -54,6 +54,15 @@ class RegisterView(APIView):
         logger.warning(f"Registration failed with errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import LoginSerializer
+import logging
+
+logger = logging.getLogger(__name__)
+
 class LoginView(APIView):
     def post(self, request):
         logger.info(f"Login attempt for email: {request.data.get('email')}")
@@ -79,7 +88,6 @@ class LoginView(APIView):
                     'height': user.height,
                     'activity_level': user.activity_level,
                     'health_goal': user.health_goal,
-                    # 'wants_newsletter': user.wants_newsletter,
                 }
             }
             
@@ -240,6 +248,14 @@ class UserProfileAPIView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+from rest_framework_simplejwt.views import TokenRefreshView
+from .serializers import CustomTokenRefreshSerializer
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
+
+
 
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
