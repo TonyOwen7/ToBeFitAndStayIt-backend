@@ -182,7 +182,9 @@ class Command(BaseCommand):
         html_content = f"""
         <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:20px;padding:30px;
                     font-family:sans-serif;border:1px solid #ffd700;box-shadow:0 10px 30px rgba(0,0,0,0.1)">
-          <h2 style="color:#ff6b35;margin-bottom:10px">Not we miss you {user.first_name or 'there'}!</h2>
+        <h2 style="color:#ff6b35;margin-bottom:10px">
+        We’ve been saving your spot, {{ user.first_name || 'legend' }} — let’s ToBeFitAndStayIt again!
+        </h2>
           
           <p style="font-size:16px;color:#333;margin-bottom:20px">
             Your ToBeFitAndStayIt account has been inactive for <strong>{days_inactive} days</strong>. 
