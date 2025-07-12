@@ -126,7 +126,7 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
 
 # serializers.py
 from rest_framework import serializers
-from .models import CustomUser, DailyNutrition, DailySleep, DailyHydration, DailyWellness
+from .models import CustomUser, DailyWellness
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -135,23 +135,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
                  'weight', 'height', 'activity_level', 'climate', 'health_goal']
         read_only_fields = ['id']
 
-class DailyNutritionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DailyNutrition
-        fields = ['id', 'user', 'date', 'kcal', 'protein', 'carbs', 'fats', 'sugar']
-        read_only_fields = ['user']
-
-class DailySleepSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DailySleep
-        fields = ['id', 'user', 'date', 'time_slept']
-        read_only_fields = ['user']
-
-class DailyHydrationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DailyHydration
-        fields = ['id', 'user', 'date', 'water_intake']
-        read_only_fields = ['user']
 
 class DailyWellnessSerializer(serializers.ModelSerializer):
     class Meta:

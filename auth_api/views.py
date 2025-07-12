@@ -299,8 +299,7 @@ from datetime import datetime, timedelta, date
 from collections import defaultdict
 from .models import CustomUser, DailyNutrition, DailySleep, DailyHydration, DailyWellness
 from .serializers import (
-    CustomUserSerializer, DailyNutritionSerializer, DailySleepSerializer,
-    DailyHydrationSerializer, DailyWellnessSerializer, DashboardSerializer
+    CustomUserSerializer, DailyWellnessSerializer, DashboardSerializer
 )
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -310,35 +309,6 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return CustomUser.objects.filter(id=self.request.user.id)
 
-class DailyNutritionViewSet(viewsets.ModelViewSet):
-    serializer_class = DailyNutritionSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        return DailyNutrition.objects.filter(user=self.request.user)
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-class DailySleepViewSet(viewsets.ModelViewSet):
-    serializer_class = DailySleepSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        return DailySleep.objects.filter(user=self.request.user)
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-class DailyHydrationViewSet(viewsets.ModelViewSet):
-    serializer_class = DailyHydrationSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        return DailyHydration.objects.filter(user=self.request.user)
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
 class DailyWellnessViewSet(viewsets.ModelViewSet):
     serializer_class = DailyWellnessSerializer

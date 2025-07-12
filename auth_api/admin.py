@@ -32,28 +32,8 @@ class CustomUserAdmin(UserAdmin):
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, DailyNutrition, DailySleep, DailyHydration, DailyWellness
+from .models import CustomUser, DailyWellness
 
-@admin.register(DailyNutrition)
-class DailyNutritionAdmin(admin.ModelAdmin):
-    list_display = ['user', 'date', 'kcal', 'protein', 'carbs', 'fats', 'sugar']
-    list_filter = ['date', 'user__gender', 'user__activity_level']
-    search_fields = ['user__email', 'user__first_name', 'user__last_name']
-    date_hierarchy = 'date'
-
-@admin.register(DailySleep)
-class DailySleepAdmin(admin.ModelAdmin):
-    list_display = ['user', 'date', 'time_slept']
-    list_filter = ['date', 'user__gender', 'user__activity_level']
-    search_fields = ['user__email', 'user__first_name', 'user__last_name']
-    date_hierarchy = 'date'
-
-@admin.register(DailyHydration)
-class DailyHydrationAdmin(admin.ModelAdmin):
-    list_display = ['user', 'date', 'water_intake']
-    list_filter = ['date', 'user__gender', 'user__activity_level']
-    search_fields = ['user__email', 'user__first_name', 'user__last_name']
-    date_hierarchy = 'date'
 
 # Unified admin config for DailyWellness (if merged model is used)
 @admin.register(DailyWellness)
