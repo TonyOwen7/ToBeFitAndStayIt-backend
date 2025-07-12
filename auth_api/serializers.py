@@ -126,7 +126,7 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
 
 # serializers.py
 from rest_framework import serializers
-from .models import CustomUser, DailyNutrition, DailySleep, DailyHydration
+from .models import CustomUser, DailyNutrition, DailySleep, DailyHydration, DailyWellness
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -138,7 +138,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class DailyNutritionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DailyNutrition
-        fields = ['id', 'user', 'date', 'kcal', 'protein', 'carbs', 'fats']
+        fields = ['id', 'user', 'date', 'kcal', 'protein', 'carbs', 'fats', 'sugar']
         read_only_fields = ['user']
 
 class DailySleepSerializer(serializers.ModelSerializer):
@@ -153,22 +153,68 @@ class DailyHydrationSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'date', 'water_intake']
         read_only_fields = ['user']
 
-class DashboardSerializer(serializers.Serializer):
-    date = serializers.DateField()
-    nutrition = DailyNutritionSerializer(required=False)
-    sleep = DailySleepSerializer(required=False)
-    hydration = DailyHydrationSerializer(required=False)
+class DailyWellnessSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DailyWellness
+        fields = [
+            'id', 'user', 'date',
+
+            # Nutrition
+            'kcal', 'protein', 'carbs', 'fats', 'sugar',
+
+            # Sleep
+            'time_slept',
+
+            # Hydration
+            'water_intake'
+        ]
+        read_only_fields = ['user']
+
+
+# class DashboardSerializer(serializers.Serializer):
+#     date = serializers.DateField()
+#     nutrition = DailyNutritionSerializer(required=False)
+#     sleep = DailySleepSerializer(required=False)
+#     hydration = DailyHydrationSerializer(required=False)
     
-    # Recommended values
+#     # Recommended values
+#     recommended_kcal = serializers.IntegerField(required=False)
+#     recommended_protein = serializers.FloatField(required=False)
+#     recommended_water = serializers.FloatField(required=False)
+#     recommended_sugar = serializers.FloatField(required=False)
+
+#     recommended_sleep = serializers.FloatField(default=8.0)
+    
+#     # Status indicators
+#     nutrition_status = serializers.CharField(required=False)
+#     sleep_status = serializers.CharField(required=False)
+#     hydration_status = serializers.CharField(required=False)
+    
+#     # Yesterday comparison
+#     yesterday_comparison = serializers.DictField(required=False)
+
+class DashboardSerializer(serializers.Serializer):
+    # Core tracking
+    date = serializers.DateField()
+    wellness = DailyWellnessSerializer(required=False)  # ✅ Unified daily model
+
+    # Recommended goals (all macros)
     recommended_kcal = serializers.IntegerField(required=False)
     recommended_protein = serializers.FloatField(required=False)
+    recommended_carbs = serializers.FloatField(required=False)
+    recommended_fats = serializers.FloatField(required=False)
+    recommended_sugar = serializers.FloatField(required=False)
     recommended_water = serializers.FloatField(required=False)
     recommended_sleep = serializers.FloatField(default=8.0)
-    
-    # Status indicators
+
+    # Status evaluations
     nutrition_status = serializers.CharField(required=False)
-    sleep_status = serializers.CharField(required=False)
     hydration_status = serializers.CharField(required=False)
-    
-    # Yesterday comparison
-    yesterday_comparison = serializers.DictField(required=False)
+    sleep_status = serializers.CharField(required=False)
+
+    # Comparative analytics
+    yesterday_comparison = serializers.DictField(
+        child=serializers.FloatField(),
+        required=False,
+        default={}
+    )

@@ -7,53 +7,88 @@ class FoodSerializer(serializers.ModelSerializer):
     protein_per_mass = serializers.ReadOnlyField()
     carbs_per_mass = serializers.ReadOnlyField()
     fats_per_mass = serializers.ReadOnlyField()
-    
-    # Show if it's a global item or user's own
+    sugar_per_mass = serializers.ReadOnlyField()  # ✅ Added sugar per mass
+
+    # Ownership flags
     is_global = serializers.SerializerMethodField()
     is_editable = serializers.SerializerMethodField()
 
     class Meta:
         model = Food
         fields = [
-            'id', 'name', 'water_percentage', 'calories_per_gram',
-            'protein_per_gram', 'carbs_per_gram', 'fats_per_gram', 'mass',
-            'calories_per_mass', 'protein_per_mass', 'carbs_per_mass', 'fats_per_mass',
-            'is_global', 'is_editable'
+            'id',
+            'name',
+            'water_percentage',
+            'calories_per_gram',
+            'protein_per_gram',
+            'carbs_per_gram',
+            'fats_per_gram',
+            'sugar_per_gram',          # ✅ New sugar input field
+            'mass',
+
+            # Computed metrics
+            'calories_per_mass',
+            'protein_per_mass',
+            'carbs_per_mass',
+            'fats_per_mass',
+            'sugar_per_mass',          # ✅ Computed sugar output
+
+            # Flags
+            'is_global',
+            'is_editable'
         ]
-        # Exclude user field from serialization (handled automatically)
-    
+
     def get_is_global(self, obj):
         return obj.user is None
-    
+
     def get_is_editable(self, obj):
-        # Users can only edit their own items, not global ones
         request = self.context.get('request')
         if request and request.user:
             return obj.user == request.user
         return False
 
 class DrinkSerializer(serializers.ModelSerializer):
-    # Computed properties
+    # Computed volume-based nutrients
     calories_per_volume = serializers.ReadOnlyField()
     sugar_per_volume = serializers.ReadOnlyField()
-    
-    # Show if it's a global item or user's own
+    protein_per_volume = serializers.ReadOnlyField()
+    carbs_per_volume = serializers.ReadOnlyField()
+    fats_per_volume = serializers.ReadOnlyField()
+
+    # Meta flags
     is_global = serializers.SerializerMethodField()
     is_editable = serializers.SerializerMethodField()
 
     class Meta:
         model = Drink
         fields = [
-            'id', 'name', 'calories_per_ml', 'sugar_per_ml', 'volume',
-            'calories_per_volume', 'sugar_per_volume',
-            'is_global', 'is_editable'
+            'id',
+            'name',
+            'volume',
+
+            # Nutrients per ml
+            'calories_per_ml',
+            'sugar_per_ml',
+            'protein_per_ml',
+            'carbs_per_ml',
+            'fats_per_ml',
+
+            # Computed per-volume totals
+            'calories_per_volume',
+            'sugar_per_volume',
+            'protein_per_volume',
+            'carbs_per_volume',
+            'fats_per_volume',
+
+            # Flags
+            'is_global',
+            'is_editable'
         ]
-    
+
     def get_is_global(self, obj):
         return obj.user is None
-    
+
     def get_is_editable(self, obj):
-        # Users can only edit their own items, not global ones
         request = self.context.get('request')
         if request and request.user:
             return obj.user == request.user

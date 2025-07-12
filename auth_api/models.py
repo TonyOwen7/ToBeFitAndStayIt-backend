@@ -146,7 +146,8 @@ class DailyNutrition(models.Model):
     protein = models.FloatField()  # grams
     carbs = models.FloatField()    # grams
     fats = models.FloatField()     # grams
-
+    sugar = models.FloatField(default=0.0)
+    
     class Meta:
         unique_together = ['user', 'date']
 
@@ -165,3 +166,26 @@ class DailyHydration(models.Model):
 
     class Meta:
         unique_together = ['user', 'date']
+
+class DailyWellness(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    date = models.DateField()
+
+    # Nutrition
+    kcal = models.PositiveIntegerField()
+    protein = models.FloatField(help_text="grams")
+    carbs = models.FloatField(help_text="grams")
+    fats = models.FloatField(help_text="grams")
+    sugar = models.FloatField(default=0.0, help_text="grams")
+
+    # Sleep
+    time_slept = models.FloatField(help_text="Hours slept")
+
+    # Hydration
+    water_intake = models.FloatField(help_text="Liters")
+
+    class Meta:
+        unique_together = ['user', 'date']
+
+    def __str__(self):
+        return f"Wellness for {self.user.email} on {self.date}"

@@ -297,10 +297,10 @@ from django.db.models import Q
 from django.utils import timezone
 from datetime import datetime, timedelta, date
 from collections import defaultdict
-from .models import CustomUser, DailyNutrition, DailySleep, DailyHydration
+from .models import CustomUser, DailyNutrition, DailySleep, DailyHydration, DailyWellness
 from .serializers import (
     CustomUserSerializer, DailyNutritionSerializer, DailySleepSerializer,
-    DailyHydrationSerializer, DashboardSerializer
+    DailyHydrationSerializer, DailyWellnessSerializer, DashboardSerializer
 )
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -340,53 +340,338 @@ class DailyHydrationViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+class DailyWellnessViewSet(viewsets.ModelViewSet):
+    serializer_class = DailyWellnessSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return DailyWellness.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+# class DashboardViewSet(viewsets.ViewSet):
+#     permission_classes = [IsAuthenticated]
+    
+#     def get_or_create_daily_data(self, user, target_date):
+#         """Get or create daily data, copying from previous day if not exists"""
+#         nutrition = DailyNutrition.objects.filter(user=user, date=target_date).first()
+#         sleep = DailySleep.objects.filter(user=user, date=target_date).first()
+#         hydration = DailyHydration.objects.filter(user=user, date=target_date).first()
+        
+#         # If data doesn't exist for target date, copy from previous day
+#         if not nutrition:
+#             prev_nutrition = DailyNutrition.objects.filter(
+#                 user=user, date__lt=target_date
+#             ).order_by('-date').first()
+#             if prev_nutrition:
+#                 nutrition = DailyNutrition.objects.create(
+#                     user=user,
+#                     date=target_date,
+#                     kcal=prev_nutrition.kcal,
+#                     protein=prev_nutrition.protein,
+#                     carbs=prev_nutrition.carbs,
+#                     fats=prev_nutrition.fats
+#                 )
+        
+#         if not sleep:
+#             prev_sleep = DailySleep.objects.filter(
+#                 user=user, date__lt=target_date
+#             ).order_by('-date').first()
+#             if prev_sleep:
+#                 sleep = DailySleep.objects.create(
+#                     user=user,
+#                     date=target_date,
+#                     time_slept=prev_sleep.time_slept
+#                 )
+        
+#         if not hydration:
+#             prev_hydration = DailyHydration.objects.filter(
+#                 user=user, date__lt=target_date
+#             ).order_by('-date').first()
+#             if prev_hydration:
+#                 hydration = DailyHydration.objects.create(
+#                     user=user,
+#                     date=target_date,
+#                     water_intake=prev_hydration.water_intake
+#                 )
+        
+#         return nutrition, sleep, hydration
+    
+#     def get_status(self, actual, recommended, tolerance=0.1):
+#         """Get status based on actual vs recommended values"""
+#         if actual is None or recommended is None:
+#             return "no_data"
+        
+#         if actual >= recommended * (1 - tolerance):
+#             return "good"
+#         else:
+#             return "needs_improvement"
+    
+#     def get_yesterday_comparison(self, user, target_date):
+#         """Compare yesterday's intake with recommended values"""
+#         yesterday = target_date - timedelta(days=1)
+        
+#         nutrition = DailyNutrition.objects.filter(user=user, date=yesterday).first()
+#         sleep = DailySleep.objects.filter(user=user, date=yesterday).first()
+#         hydration = DailyHydration.objects.filter(user=user, date=yesterday).first()
+        
+#         recommended_kcal = user.calculate_daily_calories()
+#         recommended_protein = user.calculate_protein_needs()
+#         recommended_water = user.calculate_water_needs()
+#         recommended_sleep = 8.0
+        
+#         comparison = {
+#             'date': yesterday,
+#             'nutrition': {
+#                 'status': self.get_status(
+#                     nutrition.kcal if nutrition else None, 
+#                     recommended_kcal
+#                 ),
+#                 'actual': nutrition.kcal if nutrition else None,
+#                 'recommended': recommended_kcal,
+#                 'improvement_needed': []
+#             },
+#             'sleep': {
+#                 'status': self.get_status(
+#                     sleep.time_slept if sleep else None, 
+#                     recommended_sleep
+#                 ),
+#                 'actual': sleep.time_slept if sleep else None,
+#                 'recommended': recommended_sleep,
+#                 'improvement_needed': []
+#             },
+#             'hydration': {
+#                 'status': self.get_status(
+#                     hydration.water_intake if hydration else None, 
+#                     recommended_water
+#                 ),
+#                 'actual': hydration.water_intake if hydration else None,
+#                 'recommended': recommended_water,
+#                 'improvement_needed': []
+#             }
+#         }
+        
+#         # Add improvement suggestions
+#         if comparison['nutrition']['status'] == 'needs_improvement':
+#             if nutrition and recommended_kcal:
+#                 deficit = recommended_kcal - nutrition.kcal
+#                 comparison['nutrition']['improvement_needed'].append(
+#                     f"Increase calorie intake by {deficit} kcal"
+#                 )
+        
+#         if comparison['sleep']['status'] == 'needs_improvement':
+#             if sleep:
+#                 deficit = recommended_sleep - sleep.time_slept
+#                 comparison['sleep']['improvement_needed'].append(
+#                     f"Increase sleep by {deficit:.1f} hours"
+#                 )
+        
+#         if comparison['hydration']['status'] == 'needs_improvement':
+#             if hydration and recommended_water:
+#                 deficit = recommended_water - hydration.water_intake
+#                 comparison['hydration']['improvement_needed'].append(
+#                     f"Increase water intake by {deficit:.1f} liters"
+#                 )
+        
+#         return comparison
+    
+#     @action(detail=False, methods=['get'])
+#     def daily(self, request):
+#         """Get dashboard data for a specific date"""
+#         date_str = request.query_params.get('date', str(date.today()))
+#         try:
+#             target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+#         except ValueError:
+#             return Response(
+#                 {'error': 'Invalid date format. Use YYYY-MM-DD'}, 
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+        
+#         user = request.user
+#         nutrition, sleep, hydration = self.get_or_create_daily_data(user, target_date)
+        
+#         # Get recommended values
+#         recommended_kcal = user.calculate_daily_calories()
+#         recommended_protein = user.calculate_protein_needs()
+#         recommended_water = user.calculate_water_needs()
+#         recommended_sleep = 8.0
+        
+#         # Get yesterday comparison
+#         yesterday_comparison = self.get_yesterday_comparison(user, target_date)
+        
+#         data = {
+#             'date': target_date,
+#             'nutrition': DailyNutritionSerializer(nutrition).data if nutrition else None,
+#             'sleep': DailySleepSerializer(sleep).data if sleep else None,
+#             'hydration': DailyHydrationSerializer(hydration).data if hydration else None,
+#             'recommended_kcal': recommended_kcal,
+#             'recommended_protein': recommended_protein,
+#             'recommended_water': recommended_water,
+#             'recommended_sleep': recommended_sleep,
+#             'nutrition_status': self.get_status(
+#                 nutrition.kcal if nutrition else None, 
+#                 recommended_kcal
+#             ),
+#             'sleep_status': self.get_status(
+#                 sleep.time_slept if sleep else None, 
+#                 recommended_sleep
+#             ),
+#             'hydration_status': self.get_status(
+#                 hydration.water_intake if hydration else None, 
+#                 recommended_water
+#             ),
+#             'yesterday_comparison': yesterday_comparison
+#         }
+        
+#         serializer = DashboardSerializer(data)
+#         return Response(serializer.data)
+    
+#     @action(detail=False, methods=['get'])
+#     def period(self, request):
+#         """Get dashboard data for a period (days, months, years)"""
+#         start_date_str = request.query_params.get('start_date')
+#         end_date_str = request.query_params.get('end_date')
+#         period_type = request.query_params.get('period_type', 'days')  # days, months, years
+        
+#         if not start_date_str or not end_date_str:
+#             return Response(
+#                 {'error': 'start_date and end_date are required'}, 
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+        
+#         try:
+#             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+#             end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+#         except ValueError:
+#             return Response(
+#                 {'error': 'Invalid date format. Use YYYY-MM-DD'}, 
+#                 status=status.HTTP_400_BAD_REQUEST
+#             )
+        
+#         user = request.user
+        
+#         # Get all data in the period
+#         nutrition_data = DailyNutrition.objects.filter(
+#             user=user, date__range=[start_date, end_date]
+#         ).order_by('date')
+        
+#         sleep_data = DailySleep.objects.filter(
+#             user=user, date__range=[start_date, end_date]
+#         ).order_by('date')
+        
+#         hydration_data = DailyHydration.objects.filter(
+#             user=user, date__range=[start_date, end_date]
+#         ).order_by('date')
+        
+#         # Group data by period type
+#         if period_type == 'days':
+#             # Return daily data
+#             data = []
+#             current_date = start_date
+#             while current_date <= end_date:
+#                 nutrition = nutrition_data.filter(date=current_date).first()
+#                 sleep = sleep_data.filter(date=current_date).first()
+#                 hydration = hydration_data.filter(date=current_date).first()
+                
+#                 data.append({
+#                     'date': current_date,
+#                     'nutrition': DailyNutritionSerializer(nutrition).data if nutrition else None,
+#                     'sleep': DailySleepSerializer(sleep).data if sleep else None,
+#                     'hydration': DailyHydrationSerializer(hydration).data if hydration else None,
+#                 })
+#                 current_date += timedelta(days=1)
+        
+#         elif period_type == 'months':
+#             # Group by month and calculate averages
+#             monthly_data = defaultdict(lambda: {
+#                 'nutrition': [], 'sleep': [], 'hydration': [], 'dates': []
+#             })
+            
+#             for item in nutrition_data:
+#                 key = f"{item.date.year}-{item.date.month:02d}"
+#                 monthly_data[key]['nutrition'].append(item)
+#                 monthly_data[key]['dates'].append(item.date)
+            
+#             for item in sleep_data:
+#                 key = f"{item.date.year}-{item.date.month:02d}"
+#                 monthly_data[key]['sleep'].append(item)
+            
+#             for item in hydration_data:
+#                 key = f"{item.date.year}-{item.date.month:02d}"
+#                 monthly_data[key]['hydration'].append(item)
+            
+#             data = []
+#             for month_key, month_data in monthly_data.items():
+#                 year, month = map(int, month_key.split('-'))
+                
+#                 avg_nutrition = None
+#                 if month_data['nutrition']:
+#                     avg_kcal = sum(n.kcal for n in month_data['nutrition']) / len(month_data['nutrition'])
+#                     avg_protein = sum(n.protein for n in month_data['nutrition']) / len(month_data['nutrition'])
+#                     avg_carbs = sum(n.carbs for n in month_data['nutrition']) / len(month_data['nutrition'])
+#                     avg_fats = sum(n.fats for n in month_data['nutrition']) / len(month_data['nutrition'])
+#                     avg_nutrition = {
+#                         'kcal': round(avg_kcal),
+#                         'protein': round(avg_protein, 1),
+#                         'carbs': round(avg_carbs, 1),
+#                         'fats': round(avg_fats, 1)
+#                     }
+                
+#                 avg_sleep = None
+#                 if month_data['sleep']:
+#                     avg_sleep = sum(s.time_slept for s in month_data['sleep']) / len(month_data['sleep'])
+#                     avg_sleep = round(avg_sleep, 1)
+                
+#                 avg_hydration = None
+#                 if month_data['hydration']:
+#                     avg_hydration = sum(h.water_intake for h in month_data['hydration']) / len(month_data['hydration'])
+#                     avg_hydration = round(avg_hydration, 1)
+                
+#                 data.append({
+#                     'period': f"{year}-{month:02d}",
+#                     'year': year,
+#                     'month': month,
+#                     'nutrition': avg_nutrition,
+#                     'sleep': avg_sleep,
+#                     'hydration': avg_hydration,
+#                 })
+        
+#         return Response({
+#             'period_type': period_type,
+#             'start_date': start_date,
+#             'end_date': end_date,
+#             'data': data
+#         })
+    
+
 class DashboardViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
     
     def get_or_create_daily_data(self, user, target_date):
-        """Get or create daily data, copying from previous day if not exists"""
-        nutrition = DailyNutrition.objects.filter(user=user, date=target_date).first()
-        sleep = DailySleep.objects.filter(user=user, date=target_date).first()
-        hydration = DailyHydration.objects.filter(user=user, date=target_date).first()
+        """Get or create daily wellness data, copying from previous day if not exists"""
+        wellness = DailyWellness.objects.filter(user=user, date=target_date).first()
         
         # If data doesn't exist for target date, copy from previous day
-        if not nutrition:
-            prev_nutrition = DailyNutrition.objects.filter(
+        if not wellness:
+            prev_wellness = DailyWellness.objects.filter(
                 user=user, date__lt=target_date
             ).order_by('-date').first()
-            if prev_nutrition:
-                nutrition = DailyNutrition.objects.create(
+            
+            if prev_wellness:
+                wellness = DailyWellness.objects.create(
                     user=user,
                     date=target_date,
-                    kcal=prev_nutrition.kcal,
-                    protein=prev_nutrition.protein,
-                    carbs=prev_nutrition.carbs,
-                    fats=prev_nutrition.fats
+                    kcal=prev_wellness.kcal,
+                    protein=prev_wellness.protein,
+                    carbs=prev_wellness.carbs,
+                    fats=prev_wellness.fats,
+                    sugar=prev_wellness.sugar,
+                    time_slept=prev_wellness.time_slept,
+                    water_intake=prev_wellness.water_intake
                 )
         
-        if not sleep:
-            prev_sleep = DailySleep.objects.filter(
-                user=user, date__lt=target_date
-            ).order_by('-date').first()
-            if prev_sleep:
-                sleep = DailySleep.objects.create(
-                    user=user,
-                    date=target_date,
-                    time_slept=prev_sleep.time_slept
-                )
-        
-        if not hydration:
-            prev_hydration = DailyHydration.objects.filter(
-                user=user, date__lt=target_date
-            ).order_by('-date').first()
-            if prev_hydration:
-                hydration = DailyHydration.objects.create(
-                    user=user,
-                    date=target_date,
-                    water_intake=prev_hydration.water_intake
-                )
-        
-        return nutrition, sleep, hydration
+        return wellness
     
     def get_status(self, actual, recommended, tolerance=0.1):
         """Get status based on actual vs recommended values"""
@@ -402,9 +687,7 @@ class DashboardViewSet(viewsets.ViewSet):
         """Compare yesterday's intake with recommended values"""
         yesterday = target_date - timedelta(days=1)
         
-        nutrition = DailyNutrition.objects.filter(user=user, date=yesterday).first()
-        sleep = DailySleep.objects.filter(user=user, date=yesterday).first()
-        hydration = DailyHydration.objects.filter(user=user, date=yesterday).first()
+        wellness = DailyWellness.objects.filter(user=user, date=yesterday).first()
         
         recommended_kcal = user.calculate_daily_calories()
         recommended_protein = user.calculate_protein_needs()
@@ -415,28 +698,28 @@ class DashboardViewSet(viewsets.ViewSet):
             'date': yesterday,
             'nutrition': {
                 'status': self.get_status(
-                    nutrition.kcal if nutrition else None, 
+                    wellness.kcal if wellness else None, 
                     recommended_kcal
                 ),
-                'actual': nutrition.kcal if nutrition else None,
+                'actual': wellness.kcal if wellness else None,
                 'recommended': recommended_kcal,
                 'improvement_needed': []
             },
             'sleep': {
                 'status': self.get_status(
-                    sleep.time_slept if sleep else None, 
+                    wellness.time_slept if wellness else None, 
                     recommended_sleep
                 ),
-                'actual': sleep.time_slept if sleep else None,
+                'actual': wellness.time_slept if wellness else None,
                 'recommended': recommended_sleep,
                 'improvement_needed': []
             },
             'hydration': {
                 'status': self.get_status(
-                    hydration.water_intake if hydration else None, 
+                    wellness.water_intake if wellness else None, 
                     recommended_water
                 ),
-                'actual': hydration.water_intake if hydration else None,
+                'actual': wellness.water_intake if wellness else None,
                 'recommended': recommended_water,
                 'improvement_needed': []
             }
@@ -444,22 +727,22 @@ class DashboardViewSet(viewsets.ViewSet):
         
         # Add improvement suggestions
         if comparison['nutrition']['status'] == 'needs_improvement':
-            if nutrition and recommended_kcal:
-                deficit = recommended_kcal - nutrition.kcal
+            if wellness and recommended_kcal:
+                deficit = recommended_kcal - wellness.kcal
                 comparison['nutrition']['improvement_needed'].append(
                     f"Increase calorie intake by {deficit} kcal"
                 )
         
         if comparison['sleep']['status'] == 'needs_improvement':
-            if sleep:
-                deficit = recommended_sleep - sleep.time_slept
+            if wellness:
+                deficit = recommended_sleep - wellness.time_slept
                 comparison['sleep']['improvement_needed'].append(
                     f"Increase sleep by {deficit:.1f} hours"
                 )
         
         if comparison['hydration']['status'] == 'needs_improvement':
-            if hydration and recommended_water:
-                deficit = recommended_water - hydration.water_intake
+            if wellness and recommended_water:
+                deficit = recommended_water - wellness.water_intake
                 comparison['hydration']['improvement_needed'].append(
                     f"Increase water intake by {deficit:.1f} liters"
                 )
@@ -479,7 +762,7 @@ class DashboardViewSet(viewsets.ViewSet):
             )
         
         user = request.user
-        nutrition, sleep, hydration = self.get_or_create_daily_data(user, target_date)
+        wellness = self.get_or_create_daily_data(user, target_date)
         
         # Get recommended values
         recommended_kcal = user.calculate_daily_calories()
@@ -492,30 +775,27 @@ class DashboardViewSet(viewsets.ViewSet):
         
         data = {
             'date': target_date,
-            'nutrition': DailyNutritionSerializer(nutrition).data if nutrition else None,
-            'sleep': DailySleepSerializer(sleep).data if sleep else None,
-            'hydration': DailyHydrationSerializer(hydration).data if hydration else None,
+            'wellness': DailyWellnessSerializer(wellness).data if wellness else None,
             'recommended_kcal': recommended_kcal,
             'recommended_protein': recommended_protein,
             'recommended_water': recommended_water,
             'recommended_sleep': recommended_sleep,
             'nutrition_status': self.get_status(
-                nutrition.kcal if nutrition else None, 
+                wellness.kcal if wellness else None, 
                 recommended_kcal
             ),
             'sleep_status': self.get_status(
-                sleep.time_slept if sleep else None, 
+                wellness.time_slept if wellness else None, 
                 recommended_sleep
             ),
             'hydration_status': self.get_status(
-                hydration.water_intake if hydration else None, 
+                wellness.water_intake if wellness else None, 
                 recommended_water
             ),
             'yesterday_comparison': yesterday_comparison
         }
         
-        serializer = DashboardSerializer(data)
-        return Response(serializer.data)
+        return Response(data)
     
     @action(detail=False, methods=['get'])
     def period(self, request):
@@ -541,16 +821,8 @@ class DashboardViewSet(viewsets.ViewSet):
         
         user = request.user
         
-        # Get all data in the period
-        nutrition_data = DailyNutrition.objects.filter(
-            user=user, date__range=[start_date, end_date]
-        ).order_by('date')
-        
-        sleep_data = DailySleep.objects.filter(
-            user=user, date__range=[start_date, end_date]
-        ).order_by('date')
-        
-        hydration_data = DailyHydration.objects.filter(
+        # Get all wellness data in the period
+        wellness_data = DailyWellness.objects.filter(
             user=user, date__range=[start_date, end_date]
         ).order_by('date')
         
@@ -560,71 +832,85 @@ class DashboardViewSet(viewsets.ViewSet):
             data = []
             current_date = start_date
             while current_date <= end_date:
-                nutrition = nutrition_data.filter(date=current_date).first()
-                sleep = sleep_data.filter(date=current_date).first()
-                hydration = hydration_data.filter(date=current_date).first()
+                wellness = wellness_data.filter(date=current_date).first()
                 
                 data.append({
                     'date': current_date,
-                    'nutrition': DailyNutritionSerializer(nutrition).data if nutrition else None,
-                    'sleep': DailySleepSerializer(sleep).data if sleep else None,
-                    'hydration': DailyHydrationSerializer(hydration).data if hydration else None,
+                    'wellness': DailyWellnessSerializer(wellness).data if wellness else None,
                 })
                 current_date += timedelta(days=1)
         
         elif period_type == 'months':
             # Group by month and calculate averages
             monthly_data = defaultdict(lambda: {
-                'nutrition': [], 'sleep': [], 'hydration': [], 'dates': []
+                'wellness': [], 'dates': []
             })
             
-            for item in nutrition_data:
+            for item in wellness_data:
                 key = f"{item.date.year}-{item.date.month:02d}"
-                monthly_data[key]['nutrition'].append(item)
+                monthly_data[key]['wellness'].append(item)
                 monthly_data[key]['dates'].append(item.date)
-            
-            for item in sleep_data:
-                key = f"{item.date.year}-{item.date.month:02d}"
-                monthly_data[key]['sleep'].append(item)
-            
-            for item in hydration_data:
-                key = f"{item.date.year}-{item.date.month:02d}"
-                monthly_data[key]['hydration'].append(item)
             
             data = []
             for month_key, month_data in monthly_data.items():
                 year, month = map(int, month_key.split('-'))
                 
-                avg_nutrition = None
-                if month_data['nutrition']:
-                    avg_kcal = sum(n.kcal for n in month_data['nutrition']) / len(month_data['nutrition'])
-                    avg_protein = sum(n.protein for n in month_data['nutrition']) / len(month_data['nutrition'])
-                    avg_carbs = sum(n.carbs for n in month_data['nutrition']) / len(month_data['nutrition'])
-                    avg_fats = sum(n.fats for n in month_data['nutrition']) / len(month_data['nutrition'])
-                    avg_nutrition = {
-                        'kcal': round(avg_kcal),
-                        'protein': round(avg_protein, 1),
-                        'carbs': round(avg_carbs, 1),
-                        'fats': round(avg_fats, 1)
+                avg_wellness = None
+                if month_data['wellness']:
+                    wellness_items = month_data['wellness']
+                    count = len(wellness_items)
+                    
+                    avg_wellness = {
+                        'kcal': round(sum(w.kcal for w in wellness_items) / count),
+                        'protein': round(sum(w.protein for w in wellness_items) / count, 1),
+                        'carbs': round(sum(w.carbs for w in wellness_items) / count, 1),
+                        'fats': round(sum(w.fats for w in wellness_items) / count, 1),
+                        'sugar': round(sum(w.sugar for w in wellness_items) / count, 1),
+                        'time_slept': round(sum(w.time_slept for w in wellness_items) / count, 1),
+                        'water_intake': round(sum(w.water_intake for w in wellness_items) / count, 1)
                     }
-                
-                avg_sleep = None
-                if month_data['sleep']:
-                    avg_sleep = sum(s.time_slept for s in month_data['sleep']) / len(month_data['sleep'])
-                    avg_sleep = round(avg_sleep, 1)
-                
-                avg_hydration = None
-                if month_data['hydration']:
-                    avg_hydration = sum(h.water_intake for h in month_data['hydration']) / len(month_data['hydration'])
-                    avg_hydration = round(avg_hydration, 1)
                 
                 data.append({
                     'period': f"{year}-{month:02d}",
                     'year': year,
                     'month': month,
-                    'nutrition': avg_nutrition,
-                    'sleep': avg_sleep,
-                    'hydration': avg_hydration,
+                    'wellness': avg_wellness,
+                })
+        
+        elif period_type == 'years':
+            # Group by year and calculate averages
+            yearly_data = defaultdict(lambda: {
+                'wellness': [], 'dates': []
+            })
+            
+            for item in wellness_data:
+                key = str(item.date.year)
+                yearly_data[key]['wellness'].append(item)
+                yearly_data[key]['dates'].append(item.date)
+            
+            data = []
+            for year_key, year_data in yearly_data.items():
+                year = int(year_key)
+                
+                avg_wellness = None
+                if year_data['wellness']:
+                    wellness_items = year_data['wellness']
+                    count = len(wellness_items)
+                    
+                    avg_wellness = {
+                        'kcal': round(sum(w.kcal for w in wellness_items) / count),
+                        'protein': round(sum(w.protein for w in wellness_items) / count, 1),
+                        'carbs': round(sum(w.carbs for w in wellness_items) / count, 1),
+                        'fats': round(sum(w.fats for w in wellness_items) / count, 1),
+                        'sugar': round(sum(w.sugar for w in wellness_items) / count, 1),
+                        'time_slept': round(sum(w.time_slept for w in wellness_items) / count, 1),
+                        'water_intake': round(sum(w.water_intake for w in wellness_items) / count, 1)
+                    }
+                
+                data.append({
+                    'period': str(year),
+                    'year': year,
+                    'wellness': avg_wellness,
                 })
         
         return Response({
@@ -633,7 +919,6 @@ class DashboardViewSet(viewsets.ViewSet):
             'end_date': end_date,
             'data': data
         })
-    
 
 from rest_framework.views import APIView
 from rest_framework.response import Response

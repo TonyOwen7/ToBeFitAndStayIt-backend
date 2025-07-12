@@ -22,12 +22,13 @@ def create_default_foods_and_drinks(sender, instance, created, **kwargs):
             # Default foods with nutritional data
             default_foods = [
                 {
-                    'name': 'Chicken Breast',
-                    'water_percentage': 65,
-                    'calories_per_gram': 1.65,
-                    'protein_per_gram': 0.31,
+                    'name': 'Steak',
+                    'water_percentage': 55,
+                    'calories_per_gram': 2.5,
+                    'protein_per_gram': 0.26,
                     'carbs_per_gram': 0,
-                    'fats_per_gram': 0.036,
+                    'fats_per_gram': 0.20,
+                    'sugar_per_gram': 0.0,
                     'mass': 100
                 },
                 {
@@ -37,6 +38,7 @@ def create_default_foods_and_drinks(sender, instance, created, **kwargs):
                     'protein_per_gram': 0.026,
                     'carbs_per_gram': 0.23,
                     'fats_per_gram': 0.009,
+                    'sugar_per_gram': 0.01,
                     'mass': 100
                 },
                 {
@@ -46,6 +48,7 @@ def create_default_foods_and_drinks(sender, instance, created, **kwargs):
                     'protein_per_gram': 0.028,
                     'carbs_per_gram': 0.07,
                     'fats_per_gram': 0.004,
+                    'sugar_per_gram': 0.015,
                     'mass': 100
                 },
                 {
@@ -55,6 +58,7 @@ def create_default_foods_and_drinks(sender, instance, created, **kwargs):
                     'protein_per_gram': 0.003,
                     'carbs_per_gram': 0.14,
                     'fats_per_gram': 0.002,
+                    'sugar_per_gram': 0.10,
                     'mass': 100
                 },
                 {
@@ -64,6 +68,7 @@ def create_default_foods_and_drinks(sender, instance, created, **kwargs):
                     'protein_per_gram': 0.20,
                     'carbs_per_gram': 0,
                     'fats_per_gram': 0.13,
+                    'sugar_per_gram': 0.0,
                     'mass': 100
                 },
                 {
@@ -73,6 +78,7 @@ def create_default_foods_and_drinks(sender, instance, created, **kwargs):
                     'protein_per_gram': 0.13,
                     'carbs_per_gram': 0.44,
                     'fats_per_gram': 0.035,
+                    'sugar_per_gram': 0.05,
                     'mass': 100
                 },
                 {
@@ -82,6 +88,7 @@ def create_default_foods_and_drinks(sender, instance, created, **kwargs):
                     'protein_per_gram': 0.10,
                     'carbs_per_gram': 0.036,
                     'fats_per_gram': 0.005,
+                    'sugar_per_gram': 0.035,
                     'mass': 100
                 },
                 {
@@ -91,9 +98,11 @@ def create_default_foods_and_drinks(sender, instance, created, **kwargs):
                     'protein_per_gram': 0.21,
                     'carbs_per_gram': 0.22,
                     'fats_per_gram': 0.49,
+                    'sugar_per_gram': 0.04,
                     'mass': 100
                 },
             ]
+
 
             # Default drinks with nutritional data
             default_drinks = [
@@ -101,51 +110,76 @@ def create_default_foods_and_drinks(sender, instance, created, **kwargs):
                     'name': 'Water',
                     'calories_per_ml': 0,
                     'sugar_per_ml': 0,
+                    'protein_per_ml': 0,
+                    'carbs_per_ml': 0,
+                    'fats_per_ml': 0,
                     'volume': 250
                 },
                 {
                     'name': 'Milk',
                     'calories_per_ml': 0.64,
                     'sugar_per_ml': 0.05,
+                    'protein_per_ml': 0.033,
+                    'carbs_per_ml': 0.048,
+                    'fats_per_ml': 0.035,
                     'volume': 250
                 },
                 {
                     'name': 'Orange Juice',
                     'calories_per_ml': 0.45,
                     'sugar_per_ml': 0.08,
+                    'protein_per_ml': 0.007,
+                    'carbs_per_ml': 0.11,
+                    'fats_per_ml': 0.001,
                     'volume': 250
                 },
                 {
                     'name': 'Protein Shake',
                     'calories_per_ml': 0.48,
                     'sugar_per_ml': 0.02,
+                    'protein_per_ml': 0.08,
+                    'carbs_per_ml': 0.05,
+                    'fats_per_ml': 0.01,
                     'volume': 250
                 },
                 {
                     'name': 'Green Tea',
                     'calories_per_ml': 0.008,
                     'sugar_per_ml': 0,
+                    'protein_per_ml': 0,
+                    'carbs_per_ml': 0,
+                    'fats_per_ml': 0,
                     'volume': 250
                 },
                 {
                     'name': 'Black Coffee',
                     'calories_per_ml': 0.02,
                     'sugar_per_ml': 0,
+                    'protein_per_ml': 0,
+                    'carbs_per_ml': 0,
+                    'fats_per_ml': 0,
                     'volume': 250
                 },
                 {
                     'name': 'Sports Drink',
                     'calories_per_ml': 0.20,
                     'sugar_per_ml': 0.05,
+                    'protein_per_ml': 0,
+                    'carbs_per_ml': 0.06,
+                    'fats_per_ml': 0,
                     'volume': 250
                 },
                 {
                     'name': 'Coconut Water',
                     'calories_per_ml': 0.184,
                     'sugar_per_ml': 0.03,
+                    'protein_per_ml': 0.002,
+                    'carbs_per_ml': 0.045,
+                    'fats_per_ml': 0.001,
                     'volume': 250
-                },
+                }
             ]
+
 
             # Create Food objects for the new user
             food_objects = []

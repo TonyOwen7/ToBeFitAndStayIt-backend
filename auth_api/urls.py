@@ -4,10 +4,14 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 from . import views
 
+# router.register(r'users', views.CustomUserViewSet, basename='users')
+# router.register(r'nutrition', views.DailyNutritionViewSet, basename='nutrition')
+# router.register(r'sleep', views.DailySleepViewSet, basename='sleep')
+# router.register(r'hydration', views.DailyHydrationViewSet, basename='hydration')
+# router.register(r'dashboard', views.DashboardViewSet, basename='dashboard')
+
 router.register(r'users', views.CustomUserViewSet, basename='users')
-router.register(r'nutrition', views.DailyNutritionViewSet, basename='nutrition')
-router.register(r'sleep', views.DailySleepViewSet, basename='sleep')
-router.register(r'hydration', views.DailyHydrationViewSet, basename='hydration')
+router.register(r'wellness', views.DailyWellnessViewSet, basename='wellness')  # ✅ Unified daily tracking
 router.register(r'dashboard', views.DashboardViewSet, basename='dashboard')
 
 urlpatterns = [
