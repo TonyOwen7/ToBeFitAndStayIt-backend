@@ -34,15 +34,21 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser, DailyWellness
 
-
-# Unified admin config for DailyWellness (if merged model is used)
 @admin.register(DailyWellness)
 class DailyWellnessAdmin(admin.ModelAdmin):
     list_display = [
         'user', 'date',
+        'gender', 'body_weight', 'age', 'climate', 'activity_level',
         'kcal', 'protein', 'carbs', 'fats', 'sugar',
         'time_slept', 'water_intake'
     ]
-    list_filter = ['date', 'user__gender', 'user__activity_level']
+    list_filter = [
+        'date', 
+        'gender', 
+        'climate', 
+        'activity_level', 
+        'user__gender', 
+        'user__activity_level'
+    ]
     search_fields = ['user__email', 'user__first_name', 'user__last_name']
     date_hierarchy = 'date'

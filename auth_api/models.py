@@ -139,33 +139,6 @@ class PasswordHistory(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-class DailyNutrition(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    date = models.DateField()
-    kcal = models.PositiveIntegerField()
-    protein = models.FloatField()  # grams
-    carbs = models.FloatField()    # grams
-    fats = models.FloatField()     # grams
-    sugar = models.FloatField(default=0.0)
-    
-    class Meta:
-        unique_together = ['user', 'date']
-
-class DailySleep(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    date = models.DateField()
-    time_slept = models.FloatField(help_text="Hours slept")
-
-    class Meta:
-        unique_together = ['user', 'date']
-
-class DailyHydration(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    date = models.DateField()
-    water_intake = models.FloatField(help_text="Liters")
-
-    class Meta:
-        unique_together = ['user', 'date']
 
 class DailyWellness(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -183,6 +156,19 @@ class DailyWellness(models.Model):
 
     # Hydration
     water_intake = models.FloatField(help_text="Liters")
+
+    # 👤 Profile Snapshot
+    gender = models.CharField(max_length=10, choices=[('male', 'Male'), ('female', 'Female')], blank=True, null=True)
+    body_weight = models.FloatField(null=True, blank=True)
+    age = models.PositiveIntegerField(null=True, blank=True)
+    climate = models.CharField(max_length=20, choices=[('normal', 'Normal'), ('hot', 'Hot/Humid'), ('cold', 'Cold')], blank=True, null=True)
+    activity_level = models.CharField(max_length=20, choices=[
+        ('sedentary', 'Sedentary'), 
+        ('light', 'Light'), 
+        ('moderate', 'Moderate'), 
+        ('active', 'Active'), 
+        ('very-active', 'Very Active')
+    ], blank=True, null=True)
 
     class Meta:
         unique_together = ['user', 'date']

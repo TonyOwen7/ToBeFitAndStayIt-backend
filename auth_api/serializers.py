@@ -149,32 +149,13 @@ class DailyWellnessSerializer(serializers.ModelSerializer):
             'time_slept',
 
             # Hydration
-            'water_intake'
+            'water_intake',
+
+            # 👤 User Profile Snapshot
+            'gender', 'body_weight', 'age', 'climate', 'activity_level'
         ]
         read_only_fields = ['user']
 
-
-# class DashboardSerializer(serializers.Serializer):
-#     date = serializers.DateField()
-#     nutrition = DailyNutritionSerializer(required=False)
-#     sleep = DailySleepSerializer(required=False)
-#     hydration = DailyHydrationSerializer(required=False)
-    
-#     # Recommended values
-#     recommended_kcal = serializers.IntegerField(required=False)
-#     recommended_protein = serializers.FloatField(required=False)
-#     recommended_water = serializers.FloatField(required=False)
-#     recommended_sugar = serializers.FloatField(required=False)
-
-#     recommended_sleep = serializers.FloatField(default=8.0)
-    
-#     # Status indicators
-#     nutrition_status = serializers.CharField(required=False)
-#     sleep_status = serializers.CharField(required=False)
-#     hydration_status = serializers.CharField(required=False)
-    
-#     # Yesterday comparison
-#     yesterday_comparison = serializers.DictField(required=False)
 
 class DashboardSerializer(serializers.Serializer):
     # Core tracking

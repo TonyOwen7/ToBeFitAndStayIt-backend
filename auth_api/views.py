@@ -297,7 +297,7 @@ from django.db.models import Q
 from django.utils import timezone
 from datetime import datetime, timedelta, date
 from collections import defaultdict
-from .models import CustomUser, DailyNutrition, DailySleep, DailyHydration, DailyWellness
+from .models import CustomUser, DailyWellness
 from .serializers import (
     CustomUserSerializer, DailyWellnessSerializer, DashboardSerializer
 )
@@ -308,588 +308,333 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         return CustomUser.objects.filter(id=self.request.user.id)
-
+# views.py
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import Avg, Sum, Count, Min, Max
+from django.utils import timezone
+from datetime import datetime, timedelta
+from calendar import monthrange
+import calendar
 
 class DailyWellnessViewSet(viewsets.ModelViewSet):
     serializer_class = DailyWellnessSerializer
     permission_classes = [IsAuthenticated]
-
+    
     def get_queryset(self):
-        return DailyWellness.objects.filter(user=self.request.user)
-
+        user = self.request.user
+        date_param = self.request.query_params.get('date')
+        queryset = DailyWellness.objects.filter(user=user)
+        
+        if date_param:
+            queryset = queryset.filter(date=date_param)
+        
+        return queryset.order_by('-date')
+    
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-# class DashboardViewSet(viewsets.ViewSet):
-#     permission_classes = [IsAuthenticated]
     
-#     def get_or_create_daily_data(self, user, target_date):
-#         """Get or create daily data, copying from previous day if not exists"""
-#         nutrition = DailyNutrition.objects.filter(user=user, date=target_date).first()
-#         sleep = DailySleep.objects.filter(user=user, date=target_date).first()
-#         hydration = DailyHydration.objects.filter(user=user, date=target_date).first()
+    @action(detail=False, methods=['get'])
+    def dashboard(self, request):
+        """
+        Get wellness data for different time periods
+        Parameters:
+        - period: 'day', 'week', 'month', 'year'
+        - date: specific date (YYYY-MM-DD) - required for 'day', optional for others
+        """
+        period = request.query_params.get('period', 'day')
+        date_param = request.query_params.get('date')
+        user = request.user
         
-#         # If data doesn't exist for target date, copy from previous day
-#         if not nutrition:
-#             prev_nutrition = DailyNutrition.objects.filter(
-#                 user=user, date__lt=target_date
-#             ).order_by('-date').first()
-#             if prev_nutrition:
-#                 nutrition = DailyNutrition.objects.create(
-#                     user=user,
-#                     date=target_date,
-#                     kcal=prev_nutrition.kcal,
-#                     protein=prev_nutrition.protein,
-#                     carbs=prev_nutrition.carbs,
-#                     fats=prev_nutrition.fats
-#                 )
+        # Get user's data range
+        user_data = DailyWellness.objects.filter(user=user)
+        if not user_data.exists():
+            return Response({
+                'period': period,
+                'data': [],
+                'message': 'No wellness data available'
+            })
         
-#         if not sleep:
-#             prev_sleep = DailySleep.objects.filter(
-#                 user=user, date__lt=target_date
-#             ).order_by('-date').first()
-#             if prev_sleep:
-#                 sleep = DailySleep.objects.create(
-#                     user=user,
-#                     date=target_date,
-#                     time_slept=prev_sleep.time_slept
-#                 )
+        # Get data range boundaries
+        first_record = user_data.aggregate(Min('date'))['date__min']
+        last_record = user_data.aggregate(Max('date'))['date__max']
         
-#         if not hydration:
-#             prev_hydration = DailyHydration.objects.filter(
-#                 user=user, date__lt=target_date
-#             ).order_by('-date').first()
-#             if prev_hydration:
-#                 hydration = DailyHydration.objects.create(
-#                     user=user,
-#                     date=target_date,
-#                     water_intake=prev_hydration.water_intake
-#                 )
-        
-#         return nutrition, sleep, hydration
-    
-#     def get_status(self, actual, recommended, tolerance=0.1):
-#         """Get status based on actual vs recommended values"""
-#         if actual is None or recommended is None:
-#             return "no_data"
-        
-#         if actual >= recommended * (1 - tolerance):
-#             return "good"
-#         else:
-#             return "needs_improvement"
-    
-#     def get_yesterday_comparison(self, user, target_date):
-#         """Compare yesterday's intake with recommended values"""
-#         yesterday = target_date - timedelta(days=1)
-        
-#         nutrition = DailyNutrition.objects.filter(user=user, date=yesterday).first()
-#         sleep = DailySleep.objects.filter(user=user, date=yesterday).first()
-#         hydration = DailyHydration.objects.filter(user=user, date=yesterday).first()
-        
-#         recommended_kcal = user.calculate_daily_calories()
-#         recommended_protein = user.calculate_protein_needs()
-#         recommended_water = user.calculate_water_needs()
-#         recommended_sleep = 8.0
-        
-#         comparison = {
-#             'date': yesterday,
-#             'nutrition': {
-#                 'status': self.get_status(
-#                     nutrition.kcal if nutrition else None, 
-#                     recommended_kcal
-#                 ),
-#                 'actual': nutrition.kcal if nutrition else None,
-#                 'recommended': recommended_kcal,
-#                 'improvement_needed': []
-#             },
-#             'sleep': {
-#                 'status': self.get_status(
-#                     sleep.time_slept if sleep else None, 
-#                     recommended_sleep
-#                 ),
-#                 'actual': sleep.time_slept if sleep else None,
-#                 'recommended': recommended_sleep,
-#                 'improvement_needed': []
-#             },
-#             'hydration': {
-#                 'status': self.get_status(
-#                     hydration.water_intake if hydration else None, 
-#                     recommended_water
-#                 ),
-#                 'actual': hydration.water_intake if hydration else None,
-#                 'recommended': recommended_water,
-#                 'improvement_needed': []
-#             }
-#         }
-        
-#         # Add improvement suggestions
-#         if comparison['nutrition']['status'] == 'needs_improvement':
-#             if nutrition and recommended_kcal:
-#                 deficit = recommended_kcal - nutrition.kcal
-#                 comparison['nutrition']['improvement_needed'].append(
-#                     f"Increase calorie intake by {deficit} kcal"
-#                 )
-        
-#         if comparison['sleep']['status'] == 'needs_improvement':
-#             if sleep:
-#                 deficit = recommended_sleep - sleep.time_slept
-#                 comparison['sleep']['improvement_needed'].append(
-#                     f"Increase sleep by {deficit:.1f} hours"
-#                 )
-        
-#         if comparison['hydration']['status'] == 'needs_improvement':
-#             if hydration and recommended_water:
-#                 deficit = recommended_water - hydration.water_intake
-#                 comparison['hydration']['improvement_needed'].append(
-#                     f"Increase water intake by {deficit:.1f} liters"
-#                 )
-        
-#         return comparison
-    
-#     @action(detail=False, methods=['get'])
-#     def daily(self, request):
-#         """Get dashboard data for a specific date"""
-#         date_str = request.query_params.get('date', str(date.today()))
-#         try:
-#             target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-#         except ValueError:
-#             return Response(
-#                 {'error': 'Invalid date format. Use YYYY-MM-DD'}, 
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-        
-#         user = request.user
-#         nutrition, sleep, hydration = self.get_or_create_daily_data(user, target_date)
-        
-#         # Get recommended values
-#         recommended_kcal = user.calculate_daily_calories()
-#         recommended_protein = user.calculate_protein_needs()
-#         recommended_water = user.calculate_water_needs()
-#         recommended_sleep = 8.0
-        
-#         # Get yesterday comparison
-#         yesterday_comparison = self.get_yesterday_comparison(user, target_date)
-        
-#         data = {
-#             'date': target_date,
-#             'nutrition': DailyNutritionSerializer(nutrition).data if nutrition else None,
-#             'sleep': DailySleepSerializer(sleep).data if sleep else None,
-#             'hydration': DailyHydrationSerializer(hydration).data if hydration else None,
-#             'recommended_kcal': recommended_kcal,
-#             'recommended_protein': recommended_protein,
-#             'recommended_water': recommended_water,
-#             'recommended_sleep': recommended_sleep,
-#             'nutrition_status': self.get_status(
-#                 nutrition.kcal if nutrition else None, 
-#                 recommended_kcal
-#             ),
-#             'sleep_status': self.get_status(
-#                 sleep.time_slept if sleep else None, 
-#                 recommended_sleep
-#             ),
-#             'hydration_status': self.get_status(
-#                 hydration.water_intake if hydration else None, 
-#                 recommended_water
-#             ),
-#             'yesterday_comparison': yesterday_comparison
-#         }
-        
-#         serializer = DashboardSerializer(data)
-#         return Response(serializer.data)
-    
-#     @action(detail=False, methods=['get'])
-#     def period(self, request):
-#         """Get dashboard data for a period (days, months, years)"""
-#         start_date_str = request.query_params.get('start_date')
-#         end_date_str = request.query_params.get('end_date')
-#         period_type = request.query_params.get('period_type', 'days')  # days, months, years
-        
-#         if not start_date_str or not end_date_str:
-#             return Response(
-#                 {'error': 'start_date and end_date are required'}, 
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-        
-#         try:
-#             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-#             end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-#         except ValueError:
-#             return Response(
-#                 {'error': 'Invalid date format. Use YYYY-MM-DD'}, 
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-        
-#         user = request.user
-        
-#         # Get all data in the period
-#         nutrition_data = DailyNutrition.objects.filter(
-#             user=user, date__range=[start_date, end_date]
-#         ).order_by('date')
-        
-#         sleep_data = DailySleep.objects.filter(
-#             user=user, date__range=[start_date, end_date]
-#         ).order_by('date')
-        
-#         hydration_data = DailyHydration.objects.filter(
-#             user=user, date__range=[start_date, end_date]
-#         ).order_by('date')
-        
-#         # Group data by period type
-#         if period_type == 'days':
-#             # Return daily data
-#             data = []
-#             current_date = start_date
-#             while current_date <= end_date:
-#                 nutrition = nutrition_data.filter(date=current_date).first()
-#                 sleep = sleep_data.filter(date=current_date).first()
-#                 hydration = hydration_data.filter(date=current_date).first()
-                
-#                 data.append({
-#                     'date': current_date,
-#                     'nutrition': DailyNutritionSerializer(nutrition).data if nutrition else None,
-#                     'sleep': DailySleepSerializer(sleep).data if sleep else None,
-#                     'hydration': DailyHydrationSerializer(hydration).data if hydration else None,
-#                 })
-#                 current_date += timedelta(days=1)
-        
-#         elif period_type == 'months':
-#             # Group by month and calculate averages
-#             monthly_data = defaultdict(lambda: {
-#                 'nutrition': [], 'sleep': [], 'hydration': [], 'dates': []
-#             })
-            
-#             for item in nutrition_data:
-#                 key = f"{item.date.year}-{item.date.month:02d}"
-#                 monthly_data[key]['nutrition'].append(item)
-#                 monthly_data[key]['dates'].append(item.date)
-            
-#             for item in sleep_data:
-#                 key = f"{item.date.year}-{item.date.month:02d}"
-#                 monthly_data[key]['sleep'].append(item)
-            
-#             for item in hydration_data:
-#                 key = f"{item.date.year}-{item.date.month:02d}"
-#                 monthly_data[key]['hydration'].append(item)
-            
-#             data = []
-#             for month_key, month_data in monthly_data.items():
-#                 year, month = map(int, month_key.split('-'))
-                
-#                 avg_nutrition = None
-#                 if month_data['nutrition']:
-#                     avg_kcal = sum(n.kcal for n in month_data['nutrition']) / len(month_data['nutrition'])
-#                     avg_protein = sum(n.protein for n in month_data['nutrition']) / len(month_data['nutrition'])
-#                     avg_carbs = sum(n.carbs for n in month_data['nutrition']) / len(month_data['nutrition'])
-#                     avg_fats = sum(n.fats for n in month_data['nutrition']) / len(month_data['nutrition'])
-#                     avg_nutrition = {
-#                         'kcal': round(avg_kcal),
-#                         'protein': round(avg_protein, 1),
-#                         'carbs': round(avg_carbs, 1),
-#                         'fats': round(avg_fats, 1)
-#                     }
-                
-#                 avg_sleep = None
-#                 if month_data['sleep']:
-#                     avg_sleep = sum(s.time_slept for s in month_data['sleep']) / len(month_data['sleep'])
-#                     avg_sleep = round(avg_sleep, 1)
-                
-#                 avg_hydration = None
-#                 if month_data['hydration']:
-#                     avg_hydration = sum(h.water_intake for h in month_data['hydration']) / len(month_data['hydration'])
-#                     avg_hydration = round(avg_hydration, 1)
-                
-#                 data.append({
-#                     'period': f"{year}-{month:02d}",
-#                     'year': year,
-#                     'month': month,
-#                     'nutrition': avg_nutrition,
-#                     'sleep': avg_sleep,
-#                     'hydration': avg_hydration,
-#                 })
-        
-#         return Response({
-#             'period_type': period_type,
-#             'start_date': start_date,
-#             'end_date': end_date,
-#             'data': data
-#         })
-    
-
-class DashboardViewSet(viewsets.ViewSet):
-    permission_classes = [IsAuthenticated]
-    
-    def get_or_create_daily_data(self, user, target_date):
-        """Get or create daily wellness data, copying from previous day if not exists"""
-        wellness = DailyWellness.objects.filter(user=user, date=target_date).first()
-        
-        # If data doesn't exist for target date, copy from previous day
-        if not wellness:
-            prev_wellness = DailyWellness.objects.filter(
-                user=user, date__lt=target_date
-            ).order_by('-date').first()
-            
-            if prev_wellness:
-                wellness = DailyWellness.objects.create(
-                    user=user,
-                    date=target_date,
-                    kcal=prev_wellness.kcal,
-                    protein=prev_wellness.protein,
-                    carbs=prev_wellness.carbs,
-                    fats=prev_wellness.fats,
-                    sugar=prev_wellness.sugar,
-                    time_slept=prev_wellness.time_slept,
-                    water_intake=prev_wellness.water_intake
-                )
-        
-        return wellness
-    
-    def get_status(self, actual, recommended, tolerance=0.1):
-        """Get status based on actual vs recommended values"""
-        if actual is None or recommended is None:
-            return "no_data"
-        
-        if actual >= recommended * (1 - tolerance):
-            return "good"
+        if period == 'day':
+            return self._get_day_data(user, date_param, first_record, last_record)
+        elif period == 'week':
+            return self._get_week_data(user, date_param, first_record, last_record)
+        elif period == 'month':
+            return self._get_month_data(user, date_param, first_record, last_record)
+        elif period == 'year':
+            return self._get_year_data(user, date_param, first_record, last_record)
         else:
-            return "needs_improvement"
+            return Response({'error': 'Invalid period'}, status=status.HTTP_400_BAD_REQUEST)
     
-    def get_yesterday_comparison(self, user, target_date):
-        """Compare yesterday's intake with recommended values"""
-        yesterday = target_date - timedelta(days=1)
+    def _get_day_data(self, user, date_param, first_record, last_record):
+        """Get data for a specific day"""
+        if not date_param:
+            return Response({'error': 'Date parameter required for day view'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
         
-        wellness = DailyWellness.objects.filter(user=user, date=yesterday).first()
+        try:
+            target_date = datetime.strptime(date_param, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid date format. Use YYYY-MM-DD'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
         
-        recommended_kcal = user.calculate_daily_calories()
-        recommended_protein = user.calculate_protein_needs()
-        recommended_water = user.calculate_water_needs()
-        recommended_sleep = 8.0
+        # Check if date is within user's data range
+        if target_date < first_record or target_date > last_record:
+            return Response({
+                'period': 'day',
+                'date': date_param,
+                'data': None,
+                'message': f'No data available for {date_param}'
+            })
         
-        comparison = {
-            'date': yesterday,
-            'nutrition': {
-                'status': self.get_status(
-                    wellness.kcal if wellness else None, 
-                    recommended_kcal
-                ),
-                'actual': wellness.kcal if wellness else None,
-                'recommended': recommended_kcal,
-                'improvement_needed': []
-            },
-            'sleep': {
-                'status': self.get_status(
-                    wellness.time_slept if wellness else None, 
-                    recommended_sleep
-                ),
-                'actual': wellness.time_slept if wellness else None,
-                'recommended': recommended_sleep,
-                'improvement_needed': []
-            },
-            'hydration': {
-                'status': self.get_status(
-                    wellness.water_intake if wellness else None, 
-                    recommended_water
-                ),
-                'actual': wellness.water_intake if wellness else None,
-                'recommended': recommended_water,
-                'improvement_needed': []
+        try:
+            wellness_data = DailyWellness.objects.get(user=user, date=target_date)
+            serializer = DailyWellnessSerializer(wellness_data)
+            return Response({
+                'period': 'day',
+                'date': date_param,
+                'data': serializer.data
+            })
+        except DailyWellness.DoesNotExist:
+            return Response({
+                'period': 'day',
+                'date': date_param,
+                'data': None,
+                'message': f'No data recorded for {date_param}'
+            })
+    
+    def _get_week_data(self, user, date_param, first_record, last_record):
+        """Get data for each day of a week"""
+        if date_param:
+            try:
+                target_date = datetime.strptime(date_param, '%Y-%m-%d').date()
+            except ValueError:
+                return Response({'error': 'Invalid date format. Use YYYY-MM-DD'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # Use first day of first record's week
+            target_date = first_record
+        
+        # Get the Monday of the week containing target_date
+        days_since_monday = target_date.weekday()
+        week_start = target_date - timedelta(days=days_since_monday)
+        week_end = week_start + timedelta(days=6)
+        
+        # Adjust boundaries to user's data range
+        actual_start = max(week_start, first_record)
+        actual_end = min(week_end, last_record)
+        
+        # Get data for each day in the week
+        daily_data = []
+        current_date = actual_start
+        
+        while current_date <= actual_end:
+            try:
+                wellness_data = DailyWellness.objects.get(user=user, date=current_date)
+                serializer = DailyWellnessSerializer(wellness_data)
+                daily_data.append({
+                    'date': current_date.strftime('%Y-%m-%d'),
+                    'day_of_week': current_date.strftime('%A'),
+                    'data': serializer.data
+                })
+            except DailyWellness.DoesNotExist:
+                daily_data.append({
+                    'date': current_date.strftime('%Y-%m-%d'),
+                    'day_of_week': current_date.strftime('%A'),
+                    'data': None
+                })
+            current_date += timedelta(days=1)
+        
+        return Response({
+            'period': 'week',
+            'week_start': actual_start.strftime('%Y-%m-%d'),
+            'week_end': actual_end.strftime('%Y-%m-%d'),
+            'data': daily_data
+        })
+    
+    def _get_month_data(self, user, date_param, first_record, last_record):
+        """Get aggregated data for a month"""
+        if date_param:
+            try:
+                target_date = datetime.strptime(date_param, '%Y-%m-%d').date()
+                year, month = target_date.year, target_date.month
+            except ValueError:
+                return Response({'error': 'Invalid date format. Use YYYY-MM-DD'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # Use first record's month
+            year, month = first_record.year, first_record.month
+        
+        # Get month boundaries
+        month_start = datetime(year, month, 1).date()
+        last_day = monthrange(year, month)[1]
+        month_end = datetime(year, month, last_day).date()
+        
+        # Adjust to user's data range
+        actual_start = max(month_start, first_record)
+        actual_end = min(month_end, last_record)
+        
+        # Get aggregated data for the month
+        month_data = DailyWellness.objects.filter(
+            user=user,
+            date__range=[actual_start, actual_end]
+        ).aggregate(
+            avg_kcal=Avg('kcal'),
+            avg_protein=Avg('protein'),
+            avg_carbs=Avg('carbs'),
+            avg_fats=Avg('fats'),
+            avg_sugar=Avg('sugar'),
+            avg_time_slept=Avg('time_slept'),
+            avg_water_intake=Avg('water_intake'),
+            total_days=Count('date')
+        )
+        
+        return Response({
+            'period': 'month',
+            'month': f"{year}-{month:02d}",
+            'month_name': calendar.month_name[month],
+            'period_start': actual_start.strftime('%Y-%m-%d'),
+            'period_end': actual_end.strftime('%Y-%m-%d'),
+            'data': {
+                'avg_kcal': round(month_data['avg_kcal'] or 0, 1),
+                'avg_protein': round(month_data['avg_protein'] or 0, 1),
+                'avg_carbs': round(month_data['avg_carbs'] or 0, 1),
+                'avg_fats': round(month_data['avg_fats'] or 0, 1),
+                'avg_sugar': round(month_data['avg_sugar'] or 0, 1),
+                'avg_time_slept': round(month_data['avg_time_slept'] or 0, 1),
+                'avg_water_intake': round(month_data['avg_water_intake'] or 0, 1),
+                'days_recorded': month_data['total_days']
             }
-        }
-        
-        # Add improvement suggestions
-        if comparison['nutrition']['status'] == 'needs_improvement':
-            if wellness and recommended_kcal:
-                deficit = recommended_kcal - wellness.kcal
-                comparison['nutrition']['improvement_needed'].append(
-                    f"Increase calorie intake by {deficit} kcal"
-                )
-        
-        if comparison['sleep']['status'] == 'needs_improvement':
-            if wellness:
-                deficit = recommended_sleep - wellness.time_slept
-                comparison['sleep']['improvement_needed'].append(
-                    f"Increase sleep by {deficit:.1f} hours"
-                )
-        
-        if comparison['hydration']['status'] == 'needs_improvement':
-            if wellness and recommended_water:
-                deficit = recommended_water - wellness.water_intake
-                comparison['hydration']['improvement_needed'].append(
-                    f"Increase water intake by {deficit:.1f} liters"
-                )
-        
-        return comparison
+        })
     
-    @action(detail=False, methods=['get'])
-    def daily(self, request):
-        """Get dashboard data for a specific date"""
-        date_str = request.query_params.get('date', str(date.today()))
-        try:
-            target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return Response(
-                {'error': 'Invalid date format. Use YYYY-MM-DD'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    def _get_year_data(self, user, date_param, first_record, last_record):
+        """Get average data for each month of a year"""
+        if date_param:
+            try:
+                target_date = datetime.strptime(date_param, '%Y-%m-%d').date()
+                year = target_date.year
+            except ValueError:
+                return Response({'error': 'Invalid date format. Use YYYY-MM-DD'}, 
+                              status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # Use first record's year
+            year = first_record.year
         
-        user = request.user
-        wellness = self.get_or_create_daily_data(user, target_date)
+        # Get year boundaries
+        year_start = datetime(year, 1, 1).date()
+        year_end = datetime(year, 12, 31).date()
         
-        # Get recommended values
-        recommended_kcal = user.calculate_daily_calories()
-        recommended_protein = user.calculate_protein_needs()
-        recommended_water = user.calculate_water_needs()
-        recommended_sleep = 8.0
+        # Adjust to user's data range
+        actual_start = max(year_start, first_record)
+        actual_end = min(year_end, last_record)
         
-        # Get yesterday comparison
-        yesterday_comparison = self.get_yesterday_comparison(user, target_date)
+        # Get data for each month in the year
+        monthly_data = []
         
-        data = {
-            'date': target_date,
-            'wellness': DailyWellnessSerializer(wellness).data if wellness else None,
-            'recommended_kcal': recommended_kcal,
-            'recommended_protein': recommended_protein,
-            'recommended_water': recommended_water,
-            'recommended_sleep': recommended_sleep,
-            'nutrition_status': self.get_status(
-                wellness.kcal if wellness else None, 
-                recommended_kcal
-            ),
-            'sleep_status': self.get_status(
-                wellness.time_slept if wellness else None, 
-                recommended_sleep
-            ),
-            'hydration_status': self.get_status(
-                wellness.water_intake if wellness else None, 
-                recommended_water
-            ),
-            'yesterday_comparison': yesterday_comparison
-        }
-        
-        return Response(data)
-    
-    @action(detail=False, methods=['get'])
-    def period(self, request):
-        """Get dashboard data for a period (days, months, years)"""
-        start_date_str = request.query_params.get('start_date')
-        end_date_str = request.query_params.get('end_date')
-        period_type = request.query_params.get('period_type', 'days')  # days, months, years
-        
-        if not start_date_str or not end_date_str:
-            return Response(
-                {'error': 'start_date and end_date are required'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return Response(
-                {'error': 'Invalid date format. Use YYYY-MM-DD'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        user = request.user
-        
-        # Get all wellness data in the period
-        wellness_data = DailyWellness.objects.filter(
-            user=user, date__range=[start_date, end_date]
-        ).order_by('date')
-        
-        # Group data by period type
-        if period_type == 'days':
-            # Return daily data
-            data = []
-            current_date = start_date
-            while current_date <= end_date:
-                wellness = wellness_data.filter(date=current_date).first()
-                
-                data.append({
-                    'date': current_date,
-                    'wellness': DailyWellnessSerializer(wellness).data if wellness else None,
-                })
-                current_date += timedelta(days=1)
-        
-        elif period_type == 'months':
-            # Group by month and calculate averages
-            monthly_data = defaultdict(lambda: {
-                'wellness': [], 'dates': []
-            })
+        for month in range(1, 13):
+            month_start = datetime(year, month, 1).date()
+            last_day = monthrange(year, month)[1]
+            month_end = datetime(year, month, last_day).date()
             
-            for item in wellness_data:
-                key = f"{item.date.year}-{item.date.month:02d}"
-                monthly_data[key]['wellness'].append(item)
-                monthly_data[key]['dates'].append(item.date)
+            # Skip months outside user's data range
+            if month_end < actual_start or month_start > actual_end:
+                continue
             
-            data = []
-            for month_key, month_data in monthly_data.items():
-                year, month = map(int, month_key.split('-'))
-                
-                avg_wellness = None
-                if month_data['wellness']:
-                    wellness_items = month_data['wellness']
-                    count = len(wellness_items)
-                    
-                    avg_wellness = {
-                        'kcal': round(sum(w.kcal for w in wellness_items) / count),
-                        'protein': round(sum(w.protein for w in wellness_items) / count, 1),
-                        'carbs': round(sum(w.carbs for w in wellness_items) / count, 1),
-                        'fats': round(sum(w.fats for w in wellness_items) / count, 1),
-                        'sugar': round(sum(w.sugar for w in wellness_items) / count, 1),
-                        'time_slept': round(sum(w.time_slept for w in wellness_items) / count, 1),
-                        'water_intake': round(sum(w.water_intake for w in wellness_items) / count, 1)
-                    }
-                
-                data.append({
-                    'period': f"{year}-{month:02d}",
-                    'year': year,
+            # Adjust month boundaries to user's data range
+            period_start = max(month_start, actual_start)
+            period_end = min(month_end, actual_end)
+            
+            month_stats = DailyWellness.objects.filter(
+                user=user,
+                date__range=[period_start, period_end]
+            ).aggregate(
+                avg_kcal=Avg('kcal'),
+                avg_protein=Avg('protein'),
+                avg_carbs=Avg('carbs'),
+                avg_fats=Avg('fats'),
+                avg_sugar=Avg('sugar'),
+                avg_time_slept=Avg('time_slept'),
+                avg_water_intake=Avg('water_intake'),
+                total_days=Count('date')
+            )
+            
+            if month_stats['total_days'] > 0:  # Only include months with data
+                monthly_data.append({
                     'month': month,
-                    'wellness': avg_wellness,
-                })
-        
-        elif period_type == 'years':
-            # Group by year and calculate averages
-            yearly_data = defaultdict(lambda: {
-                'wellness': [], 'dates': []
-            })
-            
-            for item in wellness_data:
-                key = str(item.date.year)
-                yearly_data[key]['wellness'].append(item)
-                yearly_data[key]['dates'].append(item.date)
-            
-            data = []
-            for year_key, year_data in yearly_data.items():
-                year = int(year_key)
-                
-                avg_wellness = None
-                if year_data['wellness']:
-                    wellness_items = year_data['wellness']
-                    count = len(wellness_items)
-                    
-                    avg_wellness = {
-                        'kcal': round(sum(w.kcal for w in wellness_items) / count),
-                        'protein': round(sum(w.protein for w in wellness_items) / count, 1),
-                        'carbs': round(sum(w.carbs for w in wellness_items) / count, 1),
-                        'fats': round(sum(w.fats for w in wellness_items) / count, 1),
-                        'sugar': round(sum(w.sugar for w in wellness_items) / count, 1),
-                        'time_slept': round(sum(w.time_slept for w in wellness_items) / count, 1),
-                        'water_intake': round(sum(w.water_intake for w in wellness_items) / count, 1)
+                    'month_name': calendar.month_name[month],
+                    'year_month': f"{year}-{month:02d}",
+                    'period_start': period_start.strftime('%Y-%m-%d'),
+                    'period_end': period_end.strftime('%Y-%m-%d'),
+                    'data': {
+                        'avg_kcal': round(month_stats['avg_kcal'] or 0, 1),
+                        'avg_protein': round(month_stats['avg_protein'] or 0, 1),
+                        'avg_carbs': round(month_stats['avg_carbs'] or 0, 1),
+                        'avg_fats': round(month_stats['avg_fats'] or 0, 1),
+                        'avg_sugar': round(month_stats['avg_sugar'] or 0, 1),
+                        'avg_time_slept': round(month_stats['avg_time_slept'] or 0, 1),
+                        'avg_water_intake': round(month_stats['avg_water_intake'] or 0, 1),
+                        'days_recorded': month_stats['total_days']
                     }
-                
-                data.append({
-                    'period': str(year),
-                    'year': year,
-                    'wellness': avg_wellness,
                 })
         
         return Response({
-            'period_type': period_type,
-            'start_date': start_date,
-            'end_date': end_date,
-            'data': data
+            'period': 'year',
+            'year': year,
+            'period_start': actual_start.strftime('%Y-%m-%d'),
+            'period_end': actual_end.strftime('%Y-%m-%d'),
+            'data': monthly_data
         })
 
+# Optional: Enhanced Dashboard ViewSet for more complex analytics
+class DashboardViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+    
+    @action(detail=False, methods=['get'])
+    def summary(self, request):
+        """Get overall wellness summary statistics"""
+        user = request.user
+        
+        # Get overall statistics
+        overall_stats = DailyWellness.objects.filter(user=user).aggregate(
+            total_days=Count('date'),
+            avg_kcal=Avg('kcal'),
+            avg_protein=Avg('protein'),
+            avg_carbs=Avg('carbs'),
+            avg_fats=Avg('fats'),
+            avg_sugar=Avg('sugar'),
+            avg_time_slept=Avg('time_slept'),
+            avg_water_intake=Avg('water_intake'),
+            first_record=Min('date'),
+            last_record=Max('date')
+        )
+        
+        if overall_stats['total_days'] == 0:
+            return Response({'message': 'No wellness data available'})
+        
+        return Response({
+            'summary': {
+                'total_days_recorded': overall_stats['total_days'],
+                'date_range': {
+                    'start': overall_stats['first_record'].strftime('%Y-%m-%d'),
+                    'end': overall_stats['last_record'].strftime('%Y-%m-%d')
+                },
+                'averages': {
+                    'kcal': round(overall_stats['avg_kcal'] or 0, 1),
+                    'protein': round(overall_stats['avg_protein'] or 0, 1),
+                    'carbs': round(overall_stats['avg_carbs'] or 0, 1),
+                    'fats': round(overall_stats['avg_fats'] or 0, 1),
+                    'sugar': round(overall_stats['avg_sugar'] or 0, 1),
+                    'time_slept': round(overall_stats['avg_time_slept'] or 0, 1),
+                    'water_intake': round(overall_stats['avg_water_intake'] or 0, 1)
+                }
+            }
+        })
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
